@@ -28,12 +28,16 @@ const ConfigPage = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [selectedHighlightColor, setSelectedHighlightColor] = useState(highlightColor);
+  // Nuevo estado para forzar la actualización de la imagen
+  const [avatarKey, setAvatarKey] = useState(0);
 
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
       setSelectedHighlightColor(highlightColor);
+      // Actualizar la key del avatar cuando el usuario cambie
+      setAvatarKey(prev => prev + 1);
     }
   }, [user, highlightColor]);
 
@@ -83,8 +87,10 @@ const ConfigPage = () => {
       await updateCurrentUser(formData);
       
       setAvatarFile(null);
-      setPreviewUrl(null); // Limpiar el preview para que la imagen del 'user' actualizado se muestre
+      setPreviewUrl(null);
       setIsEditingAvatar(false);
+      // Forzar actualización de la imagen incrementando la key
+      setAvatarKey(prev => prev + 1);
 
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
@@ -134,10 +140,12 @@ const ConfigPage = () => {
     } 
     if (user?.avatar) {
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
-        return user.avatar;
+        // Agregar timestamp para evitar caché del navegador
+        return `${user.avatar}?t=${Date.now()}`;
       }
       if (user.avatar.startsWith('avatar-')) {
-        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`;
+        // Agregar timestamp para evitar caché del navegador
+        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}`;
       }
     }
     return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
@@ -207,9 +215,14 @@ const ConfigPage = () => {
             />
           ) : (
             <img
+              key={avatarKey} // Agregar key para forzar re-render
               src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
+              onLoad={() => {
+                // Opcional: callback cuando la imagen se carga
+                console.log('Avatar actualizado');
+              }}
             />
           )}
           <button
