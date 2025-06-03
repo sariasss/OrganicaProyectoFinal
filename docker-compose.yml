@@ -13,7 +13,7 @@ services:
     environment:
       - PORT=3000
       - MONGODB_URI=mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
-      - CORS_ORIGIN=https://organicaproyectofinal-production-ec02.up.railway.app/ # Good practice to define this here
+      - CORS_ORIGIN=https://organicaproyectofinal-production-ec02.up.railway.app # Good practice to define this here
     depends_on:
       - mongotfg
     networks:
@@ -26,8 +26,8 @@ services:
     ports:
       - "5173:5173" # Or whatever port your React app uses (e.g., 3000, 5173 for Vite)
     environment:
-      - VITE_BASE_URL=https://organicaproyectofinal-production.up.railway.app/
-      - VITE_BASE_URL_IMAGE=https://organicaproyectofinal-production.up.railway.app/
+      - VITE_BASE_URL=https://organicaproyectofinal-production.up.railway.app
+      - VITE_BASE_URL_IMAGE=https://organicaproyectofinal-production.up.railway.app
       - VITE_IDPROJECT=organica-9511b
       - VITE_API_KEY=AIzaSyAbCZiZjgah89GVPjVewbbbFYMb7vopbQc
       - VITE_AUTH_DOMAIN=organica-9511b.firebaseapp.com
