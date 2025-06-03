@@ -114,5 +114,5 @@ const getUserById = async (req, res) => {
 };
 
 
-export { getUserProfile, updateUser, getUserById, getUserProfile };
+export { getUserProfile, updateUser, getUserById };
     
