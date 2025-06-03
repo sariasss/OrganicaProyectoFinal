@@ -133,19 +133,19 @@ const ConfigPage = () => {
 
   const colors = ["pink", "blue", "green", "purple"];
 
-  const getAvatarSrc = () => {
+ const getAvatarSrc = () => {
     if (previewUrl) {
       return previewUrl; 
-    }
+    } 
     if (user?.avatar) {
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
-          return user.avatar;
+        return user.avatar;
       }
       if (user.avatar.startsWith('avatar-')) {
-        return `<span class="math-inline">${VITE_BASE_URL_IMAGE}/uploads/avatars/</span>${user.avatar}`;
+        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`;
       }
     }
-    return `<span class="math-inline">${DICEBEAR_API_BASE_URL}</span>${user?.username || 'User'}`;
+    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
   };
 
   return (
