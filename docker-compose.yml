@@ -12,12 +12,12 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - MONGODB_URI=mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
+      - MONGODB_URI=mongodb://root:example@mongo:27017/organica_db?authSource=admin
       - CORS_ORIGIN=https://organicaproyectofinal-production-ec02.up.railway.appspot
       - JWT-SECRET=your_jwt_secret_here
       - AVATAR_API=https://api.dicebear.com/5.x/initials/svg?seed=
     depends_on:
-      - mongotfg
+      - mongo
     networks:
       - app-network
 
@@ -42,9 +42,9 @@ services:
     networks:
       - app-network
 
-  mongotfg:
+  mongo:
     image: mongo:latest
-    container_name: mongotfg
+    container_name: mongo
     ports:
       - "27017:27017"
     environment:
@@ -67,11 +67,11 @@ services:
     ports:
       - "8081:8081"
     environment:
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/organica_db?authSource=admin
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: 123456
     depends_on:
-      mongotfg:
+      mongo:
         condition: service_healthy
     networks:
       - app-network
