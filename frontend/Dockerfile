@@ -46,6 +46,7 @@ COPY . .
 
 # Construye la aplicación React para producción
 # Vite por defecto genera la salida en la carpeta 'dist'
+# Confiamos en que las variables ENV definidas arriba son suficientes para Vite.
 RUN npm run build
 
 # --- Etapa 2: Servir la aplicación con Nginx ---
