@@ -26,8 +26,8 @@ services:
     ports:
       - "5173:5173" # Or whatever port your React app uses (e.g., 3000, 5173 for Vite)
     environment:
-      - VITE_BASE_URL=http://localhost:3000/api
-      - VITE_BASE_URL_IMAGE=http://localhost:3000
+      - VITE_BASE_URL=https://organicaproyectofinal-production.up.railway.app/
+      - VITE_BASE_URL_IMAGE=https://organicaproyectofinal-production.up.railway.app/
       - VITE_IDPROJECT=organica-9511b
       - VITE_API_KEY=AIzaSyAbCZiZjgah89GVPjVewbbbFYMb7vopbQc
       - VITE_AUTH_DOMAIN=organica-9511b.firebaseapp.com
