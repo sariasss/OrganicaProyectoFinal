@@ -1,17 +1,15 @@
-// src/pages/ConfigPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // Importa useAuth
+import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ConfigPage = () => {
   const navigate = useNavigate();
-  const { user, logout, updateCurrentUser } = useAuth(); // Añade updateCurrentUser aquí
+  const { user, logout, updateCurrentUser } = useAuth();
 
   const {
     theme,
     highlightColor,
-
     getHighlightTextColor,
     getBorderColor,
     getBgColor,
@@ -44,10 +42,8 @@ const ConfigPage = () => {
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
   const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed=';
 
-  // --- FUNCIONES DE GUARDADO ACTUALIZADAS ---
   const handleSaveUsername = async () => {
     try {
-      // Llama a la nueva función del contexto
       await updateCurrentUser({ username });
       setIsEditingUsername(false);
     } catch (err) {
@@ -57,7 +53,6 @@ const ConfigPage = () => {
 
   const handleSaveEmail = async () => {
     try {
-      // Llama a la nueva función del contexto
       await updateCurrentUser({ email });
       setIsEditingEmail(false);
     } catch (err) {
@@ -70,6 +65,8 @@ const ConfigPage = () => {
     setAvatarFile(file);
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
     }
   };
 
@@ -83,11 +80,10 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      // Llama a la nueva función del contexto
-      await updateCurrentUser(formData); // Pasamos FormData directamente
+      await updateCurrentUser(formData);
       
       setAvatarFile(null);
-      setPreviewUrl(null);
+      setPreviewUrl(null); // Limpiar el preview para que la imagen del 'user' actualizado se muestre
       setIsEditingAvatar(false);
 
     } catch (err) {
@@ -102,10 +98,7 @@ const ConfigPage = () => {
   const handleSaveHighlightColor = async () => {
     try {
       if (user?._id) {
-        // changeHighlightColor ya debería estar actualizando el contexto de Theme
-        // Si quieres que también actualice el user en AuthContext, puedes hacer:
         await updateCurrentUser({ highlightColor: selectedHighlightColor });
-        // await changeHighlightColor(selectedHighlightColor, user._id); // Mantén esta línea si también actualiza el tema globalmente
         setShowThemeSelector(false);
       } else {
         console.error('ID de usuario no disponible para guardar el color de resaltado.');
@@ -118,13 +111,8 @@ const ConfigPage = () => {
   const toggleGlobalTheme = async () => {
     try {
       if (user?._id) {
-        // Si toggleTheme ya actualiza el tema en el backend y devuelve el usuario actualizado
-        // puedes usar el resultado para actualizar el AuthContext también.
-        // O bien, puedes pasar el nuevo tema a updateCurrentUser si tu backend lo acepta
-        // y quieres que AuthContext sea la única fuente de verdad para el 'user'.
         const newTheme = theme === 'dark' ? 'light' : 'dark';
-        await updateCurrentUser({ theme: newTheme }); // Envía el nuevo tema
-        // await toggleTheme(user._id); // Si toggleTheme ya hace la llamada a la API
+        await updateCurrentUser({ theme: newTheme });
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
       }
@@ -132,7 +120,6 @@ const ConfigPage = () => {
       console.error('Error al alternar el tema:', err);
     }
   };
-  // --- FIN FUNCIONES DE GUARDADO ACTUALIZADAS ---
 
   const handleLogout = () => {
     logout();
@@ -158,7 +145,6 @@ const ConfigPage = () => {
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>
-      {/* ... Resto del JSX igual ... */}
       <div className="flex justify-between items-end p-4">
         <button onClick={handleGoBack} className="p-2 rounded-full hover:text-gray-400">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -29,8 +29,7 @@ export const AuthProvider = ({ children }) => {
         if (!res.ok) throw new Error("No autenticado");
 
         const data = await res.json();
-        // Asegúrate de que 'data.user' contenga 'theme' y 'highlightColor'
-        setUser(data.user);
+        setUser(data.user); // Asegúrate de que 'data.user' contenga 'theme' y 'highlightColor'
         setIsAuthenticated(true);
       } catch (err) {
         setUser(null);
@@ -70,8 +69,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await res.json();
-      // Asegúrate de que 'data.user' contenga 'theme' y 'highlightColor'
-      setUser(data.user);
+      setUser(data.user); // Asegúrate de que 'data.user' contenga 'theme' y 'highlightColor'
       setIsAuthenticated(true);
       toast.success("Inicio de sesión exitoso 🎉", {
         style: { background: "green", color: "white" },
@@ -111,8 +109,7 @@ export const AuthProvider = ({ children }) => {
         return false;
       }
 
-      // Asegúrate de que 'data.user' contenga 'theme' y 'highlightColor'
-      setUser(data.user);
+      setUser(data.user); // Asegúrate de que 'data.user' contenga 'theme' y 'highlightColor'
       setIsAuthenticated(true);
       toast.success("Inicio de sesión con Google 🎉", {
         style: { background: "green", color: "white" },
@@ -179,17 +176,23 @@ export const AuthProvider = ({ children }) => {
       style: { background: "#333", color: "white" },
     });
   };
-    const updateCurrentUser = async (userData) => {
+
+  const updateCurrentUser = async (userData) => {
     if (!user?._id) {
       console.error("No se pudo actualizar el usuario: ID de usuario no disponible.");
+      toast.error("Error: ID de usuario no disponible.", {
+        style: { background: "red", color: "white" },
+      });
       return null;
     }
     try {
       // Llama a la función de servicio que se comunica con tu API
+      // Asegúrate de que updateUserService maneje correctamente FormData para avatars
       const updatedData = await updateUserService(user._id, userData);
+
       // Actualiza el estado 'user' en el contexto con la nueva información
       if (updatedData) {
-        setUser(updatedData);
+        setUser(updatedData); // Esto es clave para la actualización instantánea
         toast.success("Perfil actualizado con éxito 🎉", {
           style: { background: "green", color: "white" },
         });
@@ -216,7 +219,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     setUser,
-    updateCurrentUser, // Es crucial que setUser esté disponible
+    updateCurrentUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
