@@ -3,9 +3,6 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-# Define los argumentos de construcción para las variables de entorno de Vite
-# Estos valores serán pasados desde Railway. Es CRUCIAL que los nombres coincidan
-# EXACTAMENTE con los que tienes en Railway.
 ARG VITE_API_KEY
 ARG VITE_AUTH_DOMAIN
 ARG VITE_IDPROJECT
@@ -27,10 +24,6 @@ ENV VITE_APP_ID=${VITE_APP_ID}
 ENV VITE_BASE_URL=${VITE_BASE_URL}
 ENV VITE_BASE_URL_IMAGE=${VITE_BASE_URL_IMAGE}
 
-# --- Línea de depuración CRÍTICA (NO LA ELIMINES TODAVÍA) ---
-# Imprime todas las variables de entorno que empiezan con VITE_.
-# Esta salida en los logs de Railway nos dirá si las variables están llegando.
-# Añadimos 'date' para asegurar que esta capa no se cachee y se re-evalúe.
 RUN echo "--- Verificando variables VITE_ durante la construcción (con ARG/ENV) ---" && env | grep VITE_ || echo "No se encontraron variables VITE_." && date
 # --- Fin de la línea de depuración ---
 
