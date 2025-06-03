@@ -225,7 +225,7 @@ const uploadMedia = async (req, res) => {
         res.status(200).json({
             success: true,
             filename: req.file.filename,
-            url: `/api/blocks/uploads/content_media/${req.file.filename}` // Esta URL no la usa el frontend
+            url: `/blocks/uploads/content_media/${req.file.filename}` // Esta URL no la usa el frontend
         });
     } catch (error) {
         console.error('Error al subir archivo:', error); // Este catch solo atrapa errores en tu función uploadMedia
