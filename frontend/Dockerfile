@@ -1,17 +1,40 @@
+# --- Etapa 1: Construcción de la aplicación React (Vite) ---
 FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Copia los archivos de configuración de dependencias
+COPY package.json package-lock.json ./
 
+# Instala las dependencias de producción y desarrollo
+# npm ci es preferible para builds consistentes en CI/CD
+RUN npm ci
+
+# --- AÑADE ESTA LÍNEA TEMPORAL PARA DEPURAR ---
+# Imprime todas las variables de entorno que empiezan con VITE_
+# Esto nos ayudará a confirmar si Railway las está inyectando correctamente durante la construcción.
+RUN echo "--- Checking VITE_ variables during build ---" && env | grep VITE_ || echo "No VITE_ variables found."
+# --- FIN DE LA LÍNEA DE DEPURACIÓN ---
+
+# Copia todo el código fuente de la aplicación
 COPY . .
+
+# Construye la aplicación React para producción
+# Vite por defecto genera la salida en la carpeta 'dist'
 RUN npm run build
 
+# --- Etapa 2: Servir la aplicación con Nginx ---
 FROM nginx:alpine
 
+# Copia la configuración personalizada de Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copia los archivos estáticos construidos desde la etapa 'build'
+# ASUMIMOS que 'npm run build' de Vite genera a la carpeta 'dist'
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Expone el puerto 80, que es el puerto predeterminado de Nginx
 EXPOSE 80
 
+# Comando para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]
