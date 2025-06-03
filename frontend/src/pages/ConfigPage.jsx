@@ -149,12 +149,22 @@ const ConfigPage = () => {
       return previewUrl; 
     } 
     if (user?.avatar) {
+      console.log('Avatar del usuario:', user.avatar); // Debug
+      
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
         // Agregar timestamp y avatarKey para evitar caché del navegador
         return `${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
       }
-      if (user.avatar.startsWith('avatar-')) {
-        // Agregar timestamp y avatarKey para evitar caché del navegador
+      
+      // Verificar si contiene 'avatar-' en cualquier parte de la ruta
+      if (user.avatar.includes('avatar-')) {
+        // Si ya tiene una URL completa con dominio indefinido, usar tal como está
+        if (user.avatar.includes('/uploads/')) {
+          // Reemplazar 'undefined' con la URL base correcta
+          const cleanPath = user.avatar.replace('undefined', VITE_BASE_URL_IMAGE);
+          return `${cleanPath}?t=${Date.now()}&k=${avatarKey}`;
+        }
+        // Si solo es el nombre del archivo
         return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
       }
     }
