@@ -6,7 +6,7 @@ import fs from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const AVATARS_DIR = path.join(__dirname, '../../uploads/avatars');
+const AVATARS_DIR = path.join(__dirname, '../../uploadsAvatar del usuario: ');
 
 // Crear carpeta si no existe
 if (!fs.existsSync(AVATARS_DIR)) {

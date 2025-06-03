@@ -148,23 +148,17 @@ const ConfigPage = () => {
     if (previewUrl) {
       return previewUrl; 
     } 
-    if (user?.avatar) {
-      console.log('Avatar del usuario:', user.avatar); // Debug
-      
+    if (user?.avatar) {      
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
         // Agregar timestamp y avatarKey para evitar caché del navegador
         return `${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
       }
       
-      // Verificar si contiene 'avatar-' en cualquier parte de la ruta
       if (user.avatar.includes('avatar-')) {
-        // Si ya tiene una URL completa con dominio indefinido, usar tal como está
         if (user.avatar.includes('/uploads/')) {
-          // Reemplazar 'undefined' con la URL base correcta
           const cleanPath = user.avatar.replace('undefined', VITE_BASE_URL_IMAGE);
           return `${cleanPath}?t=${Date.now()}&k=${avatarKey}`;
         }
-        // Si solo es el nombre del archivo
         return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
       }
     }
@@ -239,14 +233,8 @@ const ConfigPage = () => {
               src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
-              onLoad={() => {
-                // Callback cuando la imagen se carga
-                console.log('Avatar cargado:', getAvatarSrc());
-              }}
               onError={(e) => {
-                // Callback si hay error al cargar la imagen
                 console.error('Error cargando avatar:', e.target.src);
-                // Opcional: mostrar imagen por defecto
                 e.target.src = `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
               }}
             />

@@ -152,8 +152,8 @@ const HomePage = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${bgColor} ${textColor} flex items-center justify-center`}>
-        Cargando proyectos...
+      <div className="min-h-screen flex items-center justify-center bg-[#212121] text-white">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
       </div>
     );
   }

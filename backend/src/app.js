@@ -28,11 +28,16 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
-// Servir archivos estáticos
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
-
+// Conectar a la base de datos
 connectDB();
 
+// Servir archivos estáticos (uploads)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+// Servir archivos estáticos de la build de React
+app.use(express.static('dist'));
+
+// RUTAS DE API - DEBEN IR ANTES DEL CATCH-ALL
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/projects", projectRoutes);
@@ -42,13 +47,21 @@ app.use("/permissions", permissionRoutes);
 app.use("/search", searchRoutes);
 app.use("/invitations", invitationRoutes);
 
-app.get("/", (req, res) => {
+// Ruta de prueba de API
+app.get("/api", (req, res) => {
     res.json({ message: "API funcionando" });
 });
 
+// CATCH-ALL HANDLER - DEBE IR AL FINAL
+// Solo para rutas que NO son de API
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist/index.html'));
+});
+
+// Middleware de manejo de errores
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Algo salió mal!' });
 });
 
-export default app; 
+export default app;
