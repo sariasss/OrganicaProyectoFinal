@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; // Importar useEffect
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext'; // Asegúrate de la ruta correcta si es AuthContext.js
 import { updateUser } from '../services/userService';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -38,18 +38,16 @@ const ConfigPage = () => {
       setEmail(user.email || '');
       setSelectedHighlightColor(highlightColor);
     }
-  }, [user, highlightColor]);
+  }, [user, highlightColor]); // Dependencias: 'user' y 'highlightColor'
 
   const handleGoBack = () => navigate(-1);
 
-  // Obtener la URL base para imágenes subidas
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
-  // Definir la URL base de DiceBear directamente aquí o desde tus variables de entorno si la tuvieras
-  const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed=';
 
   const handleSaveUsername = async () => {
     try {
       const updatedUser = await updateUser(user._id, { username });
+
       setUser(updatedUser);
       setIsEditingUsername(false);
     } catch (err) {
@@ -60,6 +58,7 @@ const ConfigPage = () => {
   const handleSaveEmail = async () => {
     try {
       const updatedUser = await updateUser(user._id, { email });
+
       setUser(updatedUser);
       setIsEditingEmail(false);
     } catch (err) {
@@ -132,23 +131,6 @@ const ConfigPage = () => {
 
   const colors = ["pink", "blue", "green", "purple"];
 
-  // Lógica para determinar la URL del avatar a mostrar
-  const getAvatarSrc = () => {
-    if (previewUrl) {
-      return previewUrl; // Si hay una vista previa de un archivo seleccionado
-    }
-    if (user?.avatar) {
-      // Si el avatar en el usuario empieza con 'avatar-', es una imagen subida
-      if (user.avatar.startsWith('avatar-')) {
-        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`;
-      }
-      // Si no empieza con 'avatar-', asumimos que es una URL externa (como DiceBear)
-      return user.avatar;
-    }
-    // Si no hay avatar en el usuario, generamos uno con DiceBear usando el username
-    return `${DICEBEAR_API_BASE_URL}${user?.username || 'DefaultUser'}`; // 'DefaultUser' como fallback
-  };
-
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>
       <div className="flex justify-between items-end p-4">
@@ -213,7 +195,12 @@ const ConfigPage = () => {
             />
           ) : (
             <img
-              src={getAvatarSrc()}
+              src={
+                previewUrl ||
+                (user?.avatar?.startsWith('avatar-')
+                  ? `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`
+                  : user?.avatar)
+              }
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
             />
