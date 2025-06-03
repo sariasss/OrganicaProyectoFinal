@@ -12,6 +12,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import invitationRoutes from './routes/invitationRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,9 +35,6 @@ connectDB();
 // Servir archivos estáticos (uploads)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Servir archivos estáticos de la build de React
-app.use(express.static('dist'));
-
 // RUTAS DE API - DEBEN IR ANTES DEL CATCH-ALL
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
@@ -52,11 +50,50 @@ app.get("/api", (req, res) => {
     res.json({ message: "API funcionando" });
 });
 
-// CATCH-ALL HANDLER - DEBE IR AL FINAL
-// Solo para rutas que NO son de API
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist/index.html'));
-});
+// Verificar si existe la carpeta dist antes de servir archivos estáticos
+const distPath = path.join(__dirname, 'dist');
+if (fs.existsSync(distPath)) {
+    // Servir archivos estáticos de la build de React
+    app.use(express.static(distPath));
+    
+    // CATCH-ALL HANDLER para SPA - DEBE IR AL FINAL
+    app.get('*', (req, res) => {
+        // Solo para rutas que NO son de API
+        if (!req.path.startsWith('/api') && !req.path.startsWith('/auth') && 
+            !req.path.startsWith('/users') && !req.path.startsWith('/projects') &&
+            !req.path.startsWith('/pages') && !req.path.startsWith('/blocks') &&
+            !req.path.startsWith('/permissions') && !req.path.startsWith('/search') &&
+            !req.path.startsWith('/invitations') && !req.path.startsWith('/uploads')) {
+            res.sendFile(path.join(__dirname, 'dist/index.html'));
+        } else {
+            res.status(404).json({ message: 'Ruta de API no encontrada' });
+        }
+    });
+} else {
+    console.log('⚠️  Carpeta dist no encontrada. Ejecutando solo como API.');
+    
+    // Ruta por defecto cuando no hay frontend build
+    app.get('/', (req, res) => {
+        res.json({ 
+            message: 'API Backend funcionando',
+            endpoints: {
+                auth: '/auth',
+                users: '/users',
+                projects: '/projects',
+                pages: '/pages',
+                blocks: '/blocks',
+                permissions: '/permissions',
+                search: '/search',
+                invitations: '/invitations'
+            }
+        });
+    });
+    
+    // Catch-all para rutas no encontradas
+    app.get('*', (req, res) => {
+        res.status(404).json({ message: 'Ruta no encontrada' });
+    });
+}
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
