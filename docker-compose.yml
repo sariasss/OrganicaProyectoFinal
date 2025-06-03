@@ -15,17 +15,18 @@ services:
       - MONGODB_URI=mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
       - CORS_ORIGIN=https://organicaproyectofinal-production-ec02.up.railway.appspot
       - JWT-SECRET=your_jwt_secret_here
+      - AVATAR_API=https://api.dicebear.com/5.x/initials/svg?seed=
     depends_on:
       - mongotfg
     networks:
       - app-network
 
-  frontend: # <--- New service for your React frontend
+  frontend:
     build:
-      context: ./frontend # Assuming your React app is in a 'frontend' directory
-      dockerfile: Dockerfile # You'll create this Dockerfile
+      context: ./frontend 
+      dockerfile: Dockerfile
     ports:
-      - "5173:5173" # Or whatever port your React app uses (e.g., 3000, 5173 for Vite)
+      - "5173:5173"
     environment:
       - VITE_BASE_URL=https://organicaproyectofinal-production.up.railway.app
       - VITE_BASE_URL_IMAGE=https://organicaproyectofinal-production.up.railway.app
@@ -36,7 +37,7 @@ services:
       - VITE_MESSAGING_SENDER_ID=704139277174
       - VITE_APP_ID=1:704139277174:web:86aebf165f5b6736d84057
     depends_on:
-      - backend # Frontend depends on the backend
+      - backend
     networks:
       - app-network
 

@@ -30,18 +30,12 @@ const ConfigPage = () => {
   const [avatarFile, setAvatarFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
-  // Mantén este estado local ya que es para la selección TEMPORAL antes de guardar
   const [selectedHighlightColor, setSelectedHighlightColor] = useState(highlightColor);
 
-  // --- NUEVO useEffect para resincronizar los estados locales con el 'user' del contexto ---
   useEffect(() => {
-    // Si el usuario en el contexto cambia, actualiza los estados locales de username y email
-    // Esto asegura que si el user se actualiza desde otra parte (ej. AuthContext),
-    // ConfigPage refleje esos cambios.
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
-      // También resincroniza selectedHighlightColor si el highlightColor del contexto cambia
       setSelectedHighlightColor(highlightColor);
     }
   }, [user, highlightColor]); // Dependencias: 'user' y 'highlightColor'
@@ -52,9 +46,8 @@ const ConfigPage = () => {
 
   const handleSaveUsername = async () => {
     try {
-      // updateUser debe devolver el objeto de usuario actualizado del backend
       const updatedUser = await updateUser(user._id, { username });
-      // setUser actualiza el usuario en el AuthContext, lo que dispara el useEffect de arriba
+
       setUser(updatedUser);
       setIsEditingUsername(false);
     } catch (err) {
@@ -65,7 +58,7 @@ const ConfigPage = () => {
   const handleSaveEmail = async () => {
     try {
       const updatedUser = await updateUser(user._id, { email });
-      // setUser actualiza el usuario en el AuthContext, lo que dispara el useEffect de arriba
+
       setUser(updatedUser);
       setIsEditingEmail(false);
     } catch (err) {
@@ -91,11 +84,8 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      // updateUser debe devolver el objeto de usuario actualizado del backend
       const updatedUser = await updateUser(user._id, formData);
 
-      // setUser actualiza el usuario en el AuthContext.
-      // El useEffect de arriba asegurará que el `src` de la imagen se actualice si `user.avatar` cambia.
       setUser(updatedUser);
       setIsEditingAvatar(false);
       setAvatarFile(null);
@@ -112,7 +102,6 @@ const ConfigPage = () => {
   const handleSaveHighlightColor = async () => {
     try {
       if (user?._id) {
-        // changeHighlightColor ya llama a setUser internamente, lo cual es correcto.
         await changeHighlightColor(selectedHighlightColor, user._id);
         setShowThemeSelector(false);
       } else {
@@ -126,7 +115,6 @@ const ConfigPage = () => {
   const toggleGlobalTheme = async () => {
     try {
       if (user?._id) {
-        // toggleTheme ya llama a setUser internamente, lo cual es correcto.
         await toggleTheme(user._id);
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
@@ -209,7 +197,7 @@ const ConfigPage = () => {
             <img
               src={
                 previewUrl ||
-                (user?.avatar?.startsWith('avatar-') // Usar 'avatar-' porque tu backend guarda `avatar-timestamp.ext`
+                (user?.avatar?.startsWith('avatar-')
                   ? `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`
                   : user?.avatar)
               }
