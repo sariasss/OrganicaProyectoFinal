@@ -42,10 +42,8 @@ const ConfigPage = () => {
 
   const handleGoBack = () => navigate(-1);
 
-  // Obtener la URL base para imágenes subidas
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
-  // Definir la URL base de DiceBear directamente aquí o desde tus variables de entorno si la tuvieras
-  const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed=';
+  const DICEBEAR_API_BASE_URL = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:https://api.dicebear.com/5.x/initials/svg?seed=';
 
   const handleSaveUsername = async () => {
     try {
@@ -138,16 +136,14 @@ const ConfigPage = () => {
       return previewUrl; // Si hay una vista previa de un archivo seleccionado
     }
     if (user?.avatar) {
-      // Si el avatar en el usuario empieza con 'avatar-', es una imagen subida
       if (user.avatar.startsWith('avatar-')) {
         return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`;
       }
-      // Si no empieza con 'avatar-', asumimos que es una URL externa (como DiceBear)
       return user.avatar;
     }
-    // Si no hay avatar en el usuario, generamos uno con DiceBear usando el username
-    return `${DICEBEAR_API_BASE_URL}${user?.username || 'DefaultUser'}`; // 'DefaultUser' como fallback
+    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
   };
+  console.log(getAvatarSrc());
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>

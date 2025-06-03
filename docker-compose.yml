@@ -36,6 +36,7 @@ services:
       - VITE_STORAGE_BUCKET=organica-9511b.appspot.com
       - VITE_MESSAGING_SENDER_ID=704139277174
       - VITE_APP_ID=1:704139277174:web:86aebf165f5b6736d84057
+      - DICEBEAR_API_BASE_URL=https://api.dicebear.com/5.x/initials/svg?seed=
     depends_on:
       - backend
     networks:
