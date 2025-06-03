@@ -2,12 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Importa useAuth
-// import { updateUser } from '../services/userService'; // Ya NO necesitas importar esto aquí
 import { useTheme } from '../contexts/ThemeContext';
 
 const ConfigPage = () => {
   const navigate = useNavigate();
-  // Obtén updateCurrentUser del contexto de autenticación
   const { user, logout, updateCurrentUser } = useAuth(); // Añade updateCurrentUser aquí
 
   const {

@@ -1,7 +1,7 @@
 // src/contexts/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
-import { updateUser } from '../services/userService';
+import { useAuth } from './AuthContext'; // Import useAuth
+import { updateUser as updateUserService } from '../services/userService'; // Import with alias
 
 const ThemeContext = createContext();
 
@@ -14,39 +14,51 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-  const { user, setUser } = useAuth();
+  // Destructure setUser from useAuth to update the global user state
+  const { user, setUser } = useAuth(); 
 
   const [theme, setTheme] = useState(user?.theme || 'dark');
   const [highlightColor, setHighlightColor] = useState(user?.highlightColor || 'pink');
 
+  // This useEffect ensures theme and highlightColor states are synced with the user from AuthContext
   useEffect(() => {
     if (user) {
       setTheme(user.theme || 'dark');
       setHighlightColor(user.highlightColor || 'pink');
     }
-  }, [user]);
+  }, [user]); // Depend on 'user' object, so it runs when user data changes
 
-  const toggleTheme = async (userId) => {
+  const toggleTheme = async () => { // Removed userId param since we get it from `user`
+    if (!user?._id) {
+        console.error('No se pudo alternar el tema: ID de usuario no disponible.');
+        return;
+    }
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     try {
-      const updatedUser = await updateUser(userId, { theme: newTheme });
-      setTheme(newTheme);
-      setUser(updatedUser);
+      // Use the imported service function, passing the user's ID and the data to update
+      const updatedUser = await updateUserService(user._id, { theme: newTheme });
+      setTheme(newTheme); // Update local theme state
+      setUser(updatedUser); // Update global user state in AuthContext
       console.log('Tema actualizado en DB y contexto:', updatedUser.theme);
     } catch (error) {
       console.error('Error al cambiar el tema:', error);
     }
   };
 
-  const changeHighlightColor = async (color, userId) => {
+  const changeHighlightColor = async (color) => { // Removed userId param since we get it from `user`
+    if (!user?._id) {
+        console.error('No se pudo cambiar el color de resaltado: ID de usuario no disponible.');
+        return;
+    }
     try {
       if (!color) {
         console.warn("No se proporcionó un color válido para actualizar el resaltado.");
         return;
       }
-      const updatedUser = await updateUser(userId, { highlightColor: color });
-      setHighlightColor(color);
-      setUser(updatedUser);
+      // Use the imported service function, passing the user's ID and the data to update
+      const updatedUser = await updateUserService(user._id, { highlightColor: color });
+      setHighlightColor(color); // Update local highlightColor state
+      setUser(updatedUser); // Update global user state in AuthContext
       console.log('Color de resaltado actualizado en DB y contexto:', updatedUser.highlightColor);
     } catch (error) {
       console.error('Error al cambiar el color de resaltado:', error);
@@ -74,8 +86,7 @@ export const ThemeProvider = ({ children }) => {
    * @param {string} [color=highlightColor] El color base a usar.
    * @returns {string} Clase CSS de Tailwind.
    */
-  const getBgColor = (color = highlightColor) => { // Eliminado isButton
-    // Usa la misma lógica de sombra que getHighlightTextColor
+  const getBgColor = (color = highlightColor) => {
     const shade = theme === 'dark' ? '300' : '900';
     return `bg-${color}-${shade}`;
   };
