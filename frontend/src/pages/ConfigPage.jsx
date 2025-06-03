@@ -8,13 +8,12 @@ import { useTheme } from '../contexts/ThemeContext';
 const ConfigPage = () => {
   const navigate = useNavigate();
   // Obtén updateCurrentUser del contexto de autenticación
-  const { user, logout, setUser, updateCurrentUser } = useAuth(); // Añade updateCurrentUser aquí
+  const { user, logout, updateCurrentUser } = useAuth(); // Añade updateCurrentUser aquí
 
   const {
     theme,
     highlightColor,
-    toggleTheme,
-    changeHighlightColor,
+
     getHighlightTextColor,
     getBorderColor,
     getBgColor,

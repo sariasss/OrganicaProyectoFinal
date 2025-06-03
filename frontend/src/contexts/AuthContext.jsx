@@ -2,6 +2,7 @@ import { signInWithPopup } from "firebase/auth";
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { auth, provider } from "../services/firebase";
+import { updateUserService } from "../services/userService";
 
 const VITE_BASE_URL = import.meta.env.VITE_BASE_URL;
 export const AuthContext = createContext();
@@ -215,7 +216,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     setUser,
-    updateCurrentUser // Es crucial que setUser esté disponible
+    updateCurrentUser, // Es crucial que setUser esté disponible
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
