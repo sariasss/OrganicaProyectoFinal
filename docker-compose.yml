@@ -13,7 +13,7 @@ services:
     environment:
       - PORT=3000
       - MONGODB_URI=mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
-      - CORS_ORIGIN=http://localhost:5173 # Good practice to define this here
+      - CORS_ORIGIN=https://organicaproyectofinal-production-ec02.up.railway.app/ # Good practice to define this here
     depends_on:
       - mongotfg
     networks:
