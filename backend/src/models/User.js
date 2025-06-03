@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
         type: String, 
         default: "default.jpg",
         get: function(v) {
-          return v ? `${process.env.BACKEND_URL}/uploads/img/${v}` : null;
+          return v ? `${process.env.BACKEND_URL}/uploads/avatar/${v}` : null;
         }
     },
     theme: { type: String, enum: ['light', 'dark'], default: 'dark'},
