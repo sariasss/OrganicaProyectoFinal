@@ -1,6 +1,6 @@
 import { fetchWithAuth, fetchWithAuthAndFiles } from '../helpers/fetch'
 
-export const updateUser = async (id, data) => {
+export const updateUserService = async (id, data) => {
     let responseData; // Para almacenar la respuesta JSON
 
     if (data instanceof FormData) {

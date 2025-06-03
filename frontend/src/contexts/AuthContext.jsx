@@ -178,6 +178,31 @@ export const AuthProvider = ({ children }) => {
       style: { background: "#333", color: "white" },
     });
   };
+    const updateCurrentUser = async (userData) => {
+    if (!user?._id) {
+      console.error("No se pudo actualizar el usuario: ID de usuario no disponible.");
+      return null;
+    }
+    try {
+      // Llama a la función de servicio que se comunica con tu API
+      const updatedData = await updateUserService(user._id, userData);
+      // Actualiza el estado 'user' en el contexto con la nueva información
+      if (updatedData) {
+        setUser(updatedData);
+        toast.success("Perfil actualizado con éxito 🎉", {
+          style: { background: "green", color: "white" },
+        });
+        return updatedData;
+      }
+      return null;
+    } catch (err) {
+      console.error("Error al actualizar el usuario desde AuthContext:", err);
+      toast.error("Error al actualizar el perfil", {
+        style: { background: "red", color: "white" },
+      });
+      throw err; // Re-lanza el error para que los componentes puedan manejarlo si es necesario
+    }
+  };
 
   const value = {
     user,
@@ -189,7 +214,8 @@ export const AuthProvider = ({ children }) => {
     googleLogin,
     register,
     logout,
-    setUser // Es crucial que setUser esté disponible
+    setUser,
+    updateCurrentUser // Es crucial que setUser esté disponible
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
