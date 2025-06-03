@@ -84,13 +84,23 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      await updateCurrentUser(formData);
+      console.log('FormData contenido:', [...formData.entries()]);
+      
+      // Guardar el avatar y esperar la respuesta
+      const updatedUser = await updateCurrentUser(formData);
+      console.log('Usuario actualizado:', updatedUser);
       
       setAvatarFile(null);
       setPreviewUrl(null);
       setIsEditingAvatar(false);
-      // Forzar actualización de la imagen incrementando la key
+      
+      // Forzar actualización múltiple para asegurar el cambio
       setAvatarKey(prev => prev + 1);
+      
+      // Esperar un poco y forzar otra actualización
+      setTimeout(() => {
+        setAvatarKey(prev => prev + 1);
+      }, 500);
 
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
@@ -140,15 +150,15 @@ const ConfigPage = () => {
     } 
     if (user?.avatar) {
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
-        // Agregar timestamp para evitar caché del navegador
-        return `${user.avatar}?t=${Date.now()}`;
+        // Agregar timestamp y avatarKey para evitar caché del navegador
+        return `${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
       }
       if (user.avatar.startsWith('avatar-')) {
-        // Agregar timestamp para evitar caché del navegador
-        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}`;
+        // Agregar timestamp y avatarKey para evitar caché del navegador
+        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
       }
     }
-    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
+    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}?k=${avatarKey}`;
   };
 
   return (
@@ -215,13 +225,19 @@ const ConfigPage = () => {
             />
           ) : (
             <img
-              key={avatarKey} // Agregar key para forzar re-render
+              key={`avatar-${avatarKey}-${user?.avatar || 'default'}`} // Key más específica
               src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
               onLoad={() => {
-                // Opcional: callback cuando la imagen se carga
-                console.log('Avatar actualizado');
+                // Callback cuando la imagen se carga
+                console.log('Avatar cargado:', getAvatarSrc());
+              }}
+              onError={(e) => {
+                // Callback si hay error al cargar la imagen
+                console.error('Error cargando avatar:', e.target.src);
+                // Opcional: mostrar imagen por defecto
+                e.target.src = `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
               }}
             />
           )}
