@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+:root {
+  --primary-dark: #212121;
+  --secondary-dark: #464646;
+  --primary-light: #D9D9D9;
+  --secondary-light: #A6A6A6;
+}
+
+.bg-primary-dark {
+  background-color: var(--primary-dark);
+}
+
+.bg-secondary-dark {
+  background-color: var(--secondary-dark);
+}
+
+.bg-primary-light {
+  background-color: var(--primary-light);
+}
+
+.bg-secondary-light {
+  background-color: var(--secondary-light);
+}
+
+.ql-editor img,
+.ql-editor video {
+  pointer-events: none;
+  user-select: none;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
