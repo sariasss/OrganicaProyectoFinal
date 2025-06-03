@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const ConfigPage = () => {
   const navigate = useNavigate();
-  const { user, logout, setUser } = useAuth();
+  const { user, logout, setUser } = useAuth(); // setUser viene del AuthContext
 
   const {
     theme,
@@ -43,7 +43,8 @@ const ConfigPage = () => {
   const handleGoBack = () => navigate(-1);
 
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
-  const DICEBEAR_API_BASE_URL = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:https://api.dicebear.com/5.x/initials/svg?seed=';
+  // **CORRECCIÓN AQUÍ:** La URL de DiceBear debe ser la base, no una combinación con VITE_BASE_URL_IMAGE
+  const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed='; // <--- CORREGIDO
 
   const handleSaveUsername = async () => {
     try {
@@ -83,12 +84,20 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
+      // Aquí, el 'updatedUser' que se recibe DEBE CONTENER el nuevo nombre de archivo
+      // del avatar (ej. 'avatar-xyz.jpg') o la URL completa de la imagen.
       const updatedUser = await updateUser(user._id, formData);
 
+      // **Este es el punto clave:** Actualiza el estado global del usuario.
+      // Esto hará que el componente se re-renderice y getAvatarSrc() use el nuevo valor.
       setUser(updatedUser);
-      setIsEditingAvatar(false);
+
+      // Limpia los estados locales de `avatarFile` y `previewUrl`
+      // Esto es importante para que la imagen mostrada sea la que viene del `user` en el AuthContext.
       setAvatarFile(null);
       setPreviewUrl(null);
+      setIsEditingAvatar(false);
+
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
     }
@@ -130,20 +139,20 @@ const ConfigPage = () => {
 
   const colors = ["pink", "blue", "green", "purple"];
 
-  // Lógica para determinar la URL del avatar a mostrar
   const getAvatarSrc = () => {
     if (previewUrl) {
-      return previewUrl; // Si hay una vista previa de un archivo seleccionado
+      return previewUrl; 
     }
     if (user?.avatar) {
-      if (user.avatar.startsWith('avatar-')) {
-        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`;
+      if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
+          return user.avatar;
       }
-      return user.avatar;
+      if (user.avatar.startsWith('avatar-')) {
+        return `<span class="math-inline">${VITE_BASE_URL_IMAGE}/uploads/avatars/</span>${user.avatar}`;
+      }
     }
-    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
+    return `<span class="math-inline">${DICEBEAR_API_BASE_URL}</span>${user?.username || 'User'}`;
   };
-  console.log(getAvatarSrc());
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>
@@ -209,7 +218,7 @@ const ConfigPage = () => {
             />
           ) : (
             <img
-              src={getAvatarSrc()} 
+              src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
             />
