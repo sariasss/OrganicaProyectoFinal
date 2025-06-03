@@ -41,7 +41,7 @@ export const fetchWithAuthAndFiles = async (endpoint, method, formData) => {
             throw new Error(errorData.message || 'Error al procesar la petición');
         }
 
-        return await response.json(); // Esto devolverá { user: {...} } o {...}
+        return await response.json();
     } catch (error) {
         console.error('Error detallado:', error);
         throw error;

@@ -84,16 +84,10 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      // Aquí, el 'updatedUser' que se recibe DEBE CONTENER el nuevo nombre de archivo
-      // del avatar (ej. 'avatar-xyz.jpg') o la URL completa de la imagen.
       const updatedUser = await updateUser(user._id, formData);
 
-      // **Este es el punto clave:** Actualiza el estado global del usuario.
-      // Esto hará que el componente se re-renderice y getAvatarSrc() use el nuevo valor.
       setUser(updatedUser);
 
-      // Limpia los estados locales de `avatarFile` y `previewUrl`
-      // Esto es importante para que la imagen mostrada sea la que viene del `user` en el AuthContext.
       setAvatarFile(null);
       setPreviewUrl(null);
       setIsEditingAvatar(false);
