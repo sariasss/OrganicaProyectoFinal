@@ -12,7 +12,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - MONGODB_URI=mongodb://root:example@mongo:27017/organica_db?authSource=admin
+      - MONGO_URL=mongodb://root:example@mongo:27017/organica_db?authSource=admin
       - CORS_ORIGIN=https://organicaproyectofinal-production-ec02.up.railway.appspot
       - JWT-SECRET=your_jwt_secret_here
       - AVATAR_API=https://api.dicebear.com/5.x/initials/svg?seed=
