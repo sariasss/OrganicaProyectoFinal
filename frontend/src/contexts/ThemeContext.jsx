@@ -1,7 +1,7 @@
 // src/contexts/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext'; // Import useAuth
-import { updateUser as updateUserService } from '../services/userService'; // Import with alias
+import { updateUserService } from '../services/userService'; // Import with alias
 
 const ThemeContext = createContext();
 
