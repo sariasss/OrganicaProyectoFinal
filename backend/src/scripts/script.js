@@ -11,7 +11,7 @@ import User from "../models/User.js"; // Asegúrate de que tu modelo User tiene 
 import Permission from "../models/Permission.js";
 import Invitation from "../models/Invitation.js";
 
-const createData = async () => {
+export const createData = async () => {
     try {
         const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017/organica_db';
         

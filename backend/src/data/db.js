@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import createData from '../scripts/script.js'; // Asegúrate de que la ruta sea correcta
+import { createData } from '../scripts/script';
 
 dotenv.config();
 
