@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { updateUserService } from '../services/userService';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ConfigPage = () => {
   const navigate = useNavigate();
-  const { user, logout, setUser } = useAuth();
+  const { user, logout, updateCurrentUser } = useAuth();
 
   const {
     theme,
     highlightColor,
-    toggleTheme,
-    changeHighlightColor,
     getHighlightTextColor,
     getBorderColor,
     getBgColor,
@@ -31,23 +28,26 @@ const ConfigPage = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [selectedHighlightColor, setSelectedHighlightColor] = useState(highlightColor);
+  // Nuevo estado para forzar la actualización de la imagen
+  const [avatarKey, setAvatarKey] = useState(0);
 
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
       setSelectedHighlightColor(highlightColor);
+      setAvatarKey(prev => prev + 1);
     }
   }, [user, highlightColor]);
 
   const handleGoBack = () => navigate(-1);
 
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
+  const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed=';
 
   const handleSaveUsername = async () => {
     try {
-      const updatedUser = await updateUserService(user._id, { username });
-      setUser(updatedUser);
+      await updateCurrentUser({ username });
       setIsEditingUsername(false);
     } catch (err) {
       console.error('Error al guardar el nombre de usuario:', err);
@@ -56,8 +56,7 @@ const ConfigPage = () => {
 
   const handleSaveEmail = async () => {
     try {
-      const updatedUser = await updateUserService(user._id, { email });
-      setUser(updatedUser);
+      await updateCurrentUser({ email });
       setIsEditingEmail(false);
     } catch (err) {
       console.error('Error al guardar el email:', err);
@@ -69,6 +68,8 @@ const ConfigPage = () => {
     setAvatarFile(file);
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
     }
   };
 
@@ -82,17 +83,24 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      const updatedUser = await updateUserService(user._id, formData);
-      setUser(updatedUser);
-      setIsEditingAvatar(false);
+      console.log('FormData contenido:', [...formData.entries()]);
+      
+      // Guardar el avatar y esperar la respuesta
+      const updatedUser = await updateCurrentUser(formData);
+      console.log('Usuario actualizado:', updatedUser);
+      
       setAvatarFile(null);
       setPreviewUrl(null);
-
-      // --- CAMBIO AQUÍ: Recargar la página después de guardar el avatar ---
+      setIsEditingAvatar(false);
+      
+      // Forzar actualización múltiple para asegurar el cambio
+      setAvatarKey(prev => prev + 1);
+      
+      // Esperar un poco y forzar otra actualización
+      setTimeout(() => {
+        setAvatarKey(prev => prev + 1);
+      }, 500);
       window.location.reload(); 
-      // Puedes usar window.location.reload(true); para forzar la recarga desde el servidor y no desde caché.
-      // Sin embargo, para imágenes que cambian con frecuencia, es posible que el navegador ya no las cachee agresivamente.
-
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
     }
@@ -105,7 +113,7 @@ const ConfigPage = () => {
   const handleSaveHighlightColor = async () => {
     try {
       if (user?._id) {
-        await changeHighlightColor(selectedHighlightColor, user._id);
+        await updateCurrentUser({ highlightColor: selectedHighlightColor });
         setShowThemeSelector(false);
       } else {
         console.error('ID de usuario no disponible para guardar el color de resaltado.');
@@ -118,7 +126,8 @@ const ConfigPage = () => {
   const toggleGlobalTheme = async () => {
     try {
       if (user?._id) {
-        await toggleTheme(user._id);
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        await updateCurrentUser({ theme: newTheme });
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
       }
@@ -133,6 +142,27 @@ const ConfigPage = () => {
   };
 
   const colors = ["pink", "blue", "green", "purple"];
+
+  const getAvatarSrc = () => {
+    if (previewUrl) {
+      return previewUrl; 
+    } 
+    if (user?.avatar) {      
+      if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
+        // Agregar timestamp y avatarKey para evitar caché del navegador
+        return `${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
+      }
+      
+      if (user.avatar.includes('avatar-')) {
+        if (user.avatar.includes('/uploads/')) {
+          const cleanPath = user.avatar.replace('undefined', VITE_BASE_URL_IMAGE);
+          return `${cleanPath}?t=${Date.now()}&k=${avatarKey}`;
+        }
+        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
+      }
+    }
+    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}?k=${avatarKey}`;
+  };
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>
@@ -198,14 +228,14 @@ const ConfigPage = () => {
             />
           ) : (
             <img
-              src={
-                previewUrl ||
-                (user?.avatar?.startsWith('avatar-')
-                  ? `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`
-                  : user?.avatar)
-              }
+              key={`avatar-${avatarKey}-${user?.avatar || 'default'}`} // Key más específica
+              src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
+              onError={(e) => {
+                console.error('Error cargando avatar:', e.target.src);
+                e.target.src = `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
+              }}
             />
           )}
           <button
