@@ -11,8 +11,8 @@ const ConfigPage = () => {
   const {
     theme,
     highlightColor,
-    toggleTheme,
-    changeHighlightColor,
+    toggleTheme, // Assuming toggleTheme updates user context with new theme
+    changeHighlightColor, // Assuming changeHighlightColor updates user context with new highlightColor
     getHighlightTextColor,
     getBorderColor,
     getBgColor,
@@ -31,23 +31,32 @@ const ConfigPage = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [selectedHighlightColor, setSelectedHighlightColor] = useState(highlightColor);
-  // Add a state to force avatar re-render
-  const [avatarReloadKey, setAvatarReloadKey] = useState(0);
+  // Add a state to force avatar re-render with a timestamp
+  const [avatarRefreshTimestamp, setAvatarRefreshTimestamp] = useState(Date.now());
 
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
       setSelectedHighlightColor(highlightColor);
-      // Increment key when user or highlightColor changes, to ensure avatar is reloaded
-      setAvatarReloadKey(prev => prev + 1);
+      // When user or highlightColor changes, force avatar re-render
+      setAvatarRefreshTimestamp(Date.now());
     }
   }, [user, highlightColor]);
 
   const handleGoBack = () => navigate(-1);
 
+  // Define your base URL for images. Crucial to ensure this is correct in production.
+  // In your production environment, make sure VITE_BASE_URL_IMAGE is set correctly.
+  // Example: VITE_BASE_URL_IMAGE=https://api.yourdomain.com
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
   const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed='; // Define DiceBear API for default avatars
+
+  // Log VITE_BASE_URL_IMAGE to console (for debugging in production)
+  useEffect(() => {
+    console.log("VITE_BASE_URL_IMAGE (in ConfigPage):", VITE_BASE_URL_IMAGE);
+  }, [VITE_BASE_URL_IMAGE]);
+
 
   const handleSaveUsername = async () => {
     try {
@@ -89,14 +98,18 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
+      console.log('Attempting to upload avatar...');
       const updatedUser = await updateUserService(user._id, formData);
-      setUser(updatedUser); // Update user in context
+      console.log('Avatar upload response - updatedUser:', updatedUser);
+
+      // IMPORTANT: Ensure updatedUser contains the correct new avatar path from the server
+      setUser(updatedUser); // Update user in context with the new data
       setIsEditingAvatar(false);
       setAvatarFile(null);
       setPreviewUrl(null);
 
-      // Force avatar re-render by updating the key
-      setAvatarReloadKey(prev => prev + 1);
+      // Force avatar re-render by updating the timestamp
+      setAvatarRefreshTimestamp(Date.now());
 
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
@@ -110,8 +123,8 @@ const ConfigPage = () => {
   const handleSaveHighlightColor = async () => {
     try {
       if (user?._id) {
-        // Assuming changeHighlightColor also updates the user context
-        await changeHighlightColor(selectedHighlightColor, user._id); 
+        // Assuming changeHighlightColor also updates the user context correctly
+        await changeHighlightColor(selectedHighlightColor, user._id);
         setShowThemeSelector(false);
       } else {
         console.error('ID de usuario no disponible para guardar el color de resaltado.');
@@ -124,8 +137,9 @@ const ConfigPage = () => {
   const toggleGlobalTheme = async () => {
     try {
       if (user?._id) {
-        // Assuming toggleTheme also updates the user context
-        await toggleTheme(user._id); 
+        // Assuming toggleTheme also updates the user context correctly
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        await toggleTheme(user._id);
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
       }
@@ -144,21 +158,37 @@ const ConfigPage = () => {
   // Helper function to get the correct avatar source
   const getAvatarSrc = () => {
     if (previewUrl) {
-      return previewUrl;
+      return previewUrl; // Show local preview immediately after file selection
     }
+
     if (user?.avatar) {
       // If it's an external URL (e.g., Google, social media avatars)
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
-        return `${user.avatar}?${avatarReloadKey}`; // Add key to force refresh
+        // Append a timestamp to prevent caching.
+        return `${user.avatar}?t=${avatarRefreshTimestamp}`;
       }
-      // If it's an uploaded avatar on your server
+      // If it's an uploaded avatar on your server (check for path structure)
+      // This logic depends on how your server names and stores avatars.
+      // Assuming 'avatar-' prefix implies an uploaded avatar.
       if (user.avatar.includes('avatar-')) {
-        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?${avatarReloadKey}`; // Add key to force refresh
+        // Ensure the path is correctly constructed relative to VITE_BASE_URL_IMAGE
+        // If user.avatar already contains the full path like '/uploads/avatars/avatar-xxx.jpg'
+        // then combine it carefully with VITE_BASE_URL_IMAGE.
+        // Example: If VITE_BASE_URL_IMAGE is 'http://example.com/api' and user.avatar is '/uploads/avatars/xyz.jpg'
+        // Result should be 'http://example.com/uploads/avatars/xyz.jpg'
+
+        // Let's assume user.avatar directly contains the filename (e.g., 'avatar-123.jpg')
+        // and your server serves them from VITE_BASE_URL_IMAGE/uploads/avatars/
+        let finalPath = `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`;
+
+        // Add a timestamp to prevent caching
+        return `${finalPath}?t=${avatarRefreshTimestamp}`;
       }
     }
-    // Fallback to DiceBear if no avatar is set or URL is invalid
-    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}?${avatarReloadKey}`;
+    // Fallback to DiceBear if no avatar is set or URL is invalid/not recognized
+    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}?t=${avatarRefreshTimestamp}`;
   };
+
 
   return (
     <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>
@@ -224,11 +254,12 @@ const ConfigPage = () => {
             />
           ) : (
             <img
-              key={avatarReloadKey} // Use key prop to force remount and re-fetch
+              key={avatarRefreshTimestamp} // Using timestamp as key for aggressive re-render
               src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
               onError={(e) => {
+                console.error('Error al cargar la imagen del avatar:', e.target.src);
                 // Fallback to DiceBear if the main image fails to load
                 e.target.src = `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
               }}
