@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { updateUser } from '../services/userService';
-import { useTheme } from '../contexts/ThemeContext';
+import { useEffect, useState } from "react";
+import { updateUser } from "../services/userService";
+import { useTheme } from "../contexts/ThemeContext";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const ConfigPage = () => {
   const navigate = useNavigate();
@@ -32,7 +32,11 @@ const ConfigPage = () => {
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [selectedHighlightColor, setSelectedHighlightColor] = useState(highlightColor);
 
+  // Default avatar placeholder
+  const defaultAvatar = 'https://placehold.co/96x96/cccccc/333333?text=User';
+
   useEffect(() => {
+    // Update local state when user or highlightColor from context changes
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
@@ -42,14 +46,22 @@ const ConfigPage = () => {
 
   const handleGoBack = () => navigate(-1);
 
-  const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'https://organicaproyectofinal-production-d5a4.up.railway.app';
+  // Base URL for images, hardcoded for self-contained execution
+  const VITE_BASE_URL_IMAGE = 'https://organicaproyectofinal-production-d5a4.up.railway.app';
+
+  // Function to update user state by merging existing data with new data
+  // This function is now part of the component to ensure it uses the component's setUser
+  const updateUserState = (updatedFields) => {
+    setUser(prevUser => ({ ...prevUser, ...updatedFields }));
+  };
 
   const handleSaveUsername = async () => {
     try {
+      // Call the mock updateUser
       const updatedUser = await updateUser(user._id, { username });
-      setUser(updatedUser);
+      // Merge the updated user data to preserve other fields like avatar
+      updateUserState(updatedUser);
       setIsEditingUsername(false);
-      window.location.reload(); 
     } catch (err) {
       console.error('Error al guardar el nombre de usuario:', err);
     }
@@ -57,10 +69,11 @@ const ConfigPage = () => {
 
   const handleSaveEmail = async () => {
     try {
+      // Call the mock updateUser
       const updatedUser = await updateUser(user._id, { email });
-      setUser(updatedUser);
+      // Merge the updated user data to preserve other fields like avatar
+      updateUserState(updatedUser);
       setIsEditingEmail(false);
-      window.location.reload(); 
     } catch (err) {
       console.error('Error al guardar el email:', err);
     }
@@ -69,7 +82,6 @@ const ConfigPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setAvatarFile(file);
-    window.location.reload(); 
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
     }
@@ -85,13 +97,13 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
+      // Call the mock updateUser
       const updatedUser = await updateUser(user._id, formData);
-      setUser(updatedUser);
+      // Merge the updated user data to preserve other fields
+      updateUserState(updatedUser);
       setIsEditingAvatar(false);
       setAvatarFile(null);
       setPreviewUrl(null);
-
-      window.location.reload(); 
 
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
@@ -105,9 +117,9 @@ const ConfigPage = () => {
   const handleSaveHighlightColor = async () => {
     try {
       if (user?._id) {
+        // Call the mock changeHighlightColor
         await changeHighlightColor(selectedHighlightColor, user._id);
         setShowThemeSelector(false);
-        window.location.reload(); 
       } else {
         console.error('ID de usuario no disponible para guardar el color de resaltado.');
       }
@@ -119,8 +131,8 @@ const ConfigPage = () => {
   const toggleGlobalTheme = async () => {
     try {
       if (user?._id) {
+        // Call the mock toggleTheme
         await toggleTheme(user._id);
-        window.location.reload(); 
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
       }
@@ -137,7 +149,7 @@ const ConfigPage = () => {
   const colors = ["pink", "blue", "green", "purple"];
 
   return (
-    <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4`}>
+    <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col px-12 py-4 font-inter`}>
       <div className="flex justify-between items-end p-4">
         <button onClick={handleGoBack} className="p-2 rounded-full hover:text-gray-400">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -204,10 +216,11 @@ const ConfigPage = () => {
                 previewUrl ||
                 (user?.avatar?.startsWith('avatar-')
                   ? `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}`
-                  : user?.avatar)
+                  : user?.avatar) || defaultAvatar
               }
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
+              onError={(e) => { e.target.src = defaultAvatar; }} // Fallback if image fails to load
             />
           )}
           <button
