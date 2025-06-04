@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: './', // <-- importante si tu app se sirve en subrutas o para evitar errores en producción
+  base: './',
   plugins: [react(), tailwindcss()],
   server: {
     host: '0.0.0.0',
@@ -11,8 +11,10 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
-     allowedHosts: [
+    allowedHosts: [
       'front-production-0596.up.railway.app'
-    ]
-  },
+    ],
+    // 🔧 Esta es la línea que importa para rutas tipo /project/123
+    historyApiFallback: true 
+  }
 })
