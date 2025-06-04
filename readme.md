@@ -140,13 +140,7 @@ Notas:
 
 ## Inicialización de la Base de Datos
 
-Se incluye un servicio especial llamado `seed_db`, encargado de ejecutar un script de inicialización que carga datos básicos en la base de datos. Este servicio solo debe ejecutarse una vez:
-
-```bash
-docker-compose run seed_db
-```
-
-Este script crea usuarios de prueba y otros datos necesarios para comenzar a utilizar la aplicación de inmediato.
+Se incluye un servicio especial llamado `seed_db`, encargado de ejecutar un script de inicialización que carga datos básicos en la base de datos. 
 
 ### Usuarios de prueba
 
