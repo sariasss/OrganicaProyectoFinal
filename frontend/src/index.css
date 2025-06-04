@@ -31,3 +31,43 @@
   height: auto;
   display: block;
 }
+
+/* CSS para ReactQuill modo oscuro - Agregar a tu archivo CSS principal */
+
+.quill-dark-theme .ql-toolbar {
+  background-color: #374151 !important;
+  border-color: #4B5563 !important;
+}
+
+.quill-dark-theme .ql-container {
+  background-color: #1F2937 !important;
+  border-color: #4B5563 !important;
+}
+
+.quill-dark-theme .ql-editor {
+  background-color: #1F2937 !important;
+  color: #F9FAFB !important;
+}
+
+/* Iconos blancos en modo oscuro */
+.quill-dark-theme .ql-toolbar button {
+  color: #ffffff !important;
+}
+
+.quill-dark-theme .ql-toolbar .ql-picker-label {
+  color: #ffffff !important;
+}
+
+.quill-dark-theme .ql-toolbar .ql-picker-options {
+  background-color: #374151 !important;
+  border-color: #4B5563 !important;
+}
+
+.quill-dark-theme .ql-toolbar .ql-picker-item {
+  color: #F9FAFB !important;
+}
+
+.quill-dark-theme .ql-toolbar .ql-picker-item:hover {
+  background-color: #4B5563 !important;
+  color: #ffffff !important;
+}

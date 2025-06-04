@@ -111,9 +111,26 @@ export const SortableBlockItem = ({
         if (isEditingBlockContent && quillRef.current) {
             setTimeout(() => {
                 quillRef.current.getEditor().focus();
+                
+                // Aplicar estilos para modo oscuro
+                if (theme === 'dark') {
+                    const toolbar = quillRef.current.getEditor().container.previousSibling;
+                    if (toolbar) {
+                        const buttons = toolbar.querySelectorAll('button');
+                        const pickerLabels = toolbar.querySelectorAll('.ql-picker-label');
+                        
+                        buttons.forEach(btn => {
+                            btn.style.color = '#ffffff';
+                        });
+                        
+                        pickerLabels.forEach(label => {
+                            label.style.color = '#ffffff';
+                        });
+                    }
+                }
             }, 100);
         }
-    }, [isEditingBlockContent]);
+    }, [isEditingBlockContent, theme]);
 
     const handleTextChange = (value) => setEditedContent(value);
 
@@ -284,16 +301,21 @@ export const SortableBlockItem = ({
                         {isEditable && isEditingBlockContent ? (
                             <div className="space-y-4">
                                 <div className={`rounded-lg overflow-hidden border-2 ${textColor === 'text-white' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${textColor === 'text-white' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
-                                    <ReactQuill
-                                        ref={quillRef}
-                                        theme="snow"
-                                        value={editedContent}
-                                        onChange={handleTextChange}
-                                        modules={modules}
-                                        formats={formats}
-                                        className={`quill-custom-theme ${theme === 'dark' ? 'quill-dark-theme [&_.ql-toolbar_button]:!text-white [&_.ql-toolbar_.ql-picker-label]:!text-white' : 'quill-light-theme'}`}
-                                        placeholder="Escribe tu contenido aquí..."
-                                    />
+                                    <div style={theme === 'dark' ? {
+                                        '--quill-toolbar-button-color': '#ffffff',
+                                        '--quill-toolbar-picker-color': '#ffffff'
+                                    } : {}}>
+                                        <ReactQuill
+                                            ref={quillRef}
+                                            theme="snow"
+                                            value={editedContent}
+                                            onChange={handleTextChange}
+                                            modules={modules}
+                                            formats={formats}
+                                            className={`quill-custom-theme ${theme === 'dark' ? 'quill-dark-theme' : 'quill-light-theme'}`}
+                                            placeholder="Escribe tu contenido aquí..."
+                                        />
+                                    </div>
                                 </div>
                                 <div className="flex justify-end gap-3">
                                     <button
