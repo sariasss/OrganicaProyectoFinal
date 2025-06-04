@@ -1,242 +1,163 @@
-# API Documentation - Endpoints & Examples
+# Orgánica – Documentación de Endpoints y Despliegue
 
-## 🔐 Autenticación
+Este documento incluye los principales endpoints de la aplicación **Orgánica**, así como instrucciones detalladas para desplegar el proyecto utilizando Docker Compose.
 
-### Registro de Usuario
-```http
-POST /api/auth/register
-Content-Type: application/json
+---
 
-{
-    "username": "usuario123",
-    "email": "usuario@email.com",
-    "password": "contraseña123"
-}
+## Instrucciones de Despliegue con Docker Compose
+
+### Requisitos Previos
+
+- Tener instalado [Docker](https://www.docker.com/)
+- Tener instalado [Docker Compose](https://docs.docker.com/compose/)
+
+### 1. Clonar el Repositorio
+
+```bash
+git clone https://github.com/tu-usuario/organica.git
+cd organica
 ```
 
-### Login
-```http
-POST /api/auth/login
-Content-Type: application/json
+### 2. Seleccionar la Rama
 
-{
-    "username": "usuario123",
-    "password": "contraseña123"
-}
+- `local`: desarrollo local.
+- `develop`: despliegue en entorno de pruebas o producción.
+- `main`: validación general y pruebas.
+
+Ejemplo:
+```bash
+git checkout local
 ```
 
-## 👤 Usuarios
+### 3. Iniciar los Servicios
 
-### Obtener Perfil
-```http
-GET /api/users/me
-Authorization: Bearer {token}
+```bash
+docker-compose up --build
 ```
 
-### Actualizar Perfil
-```http
-PUT /api/users/me
-Authorization: Bearer {token}
-Content-Type: application/json
+Servicios que se levantarán:
 
-{
-    "username": "nuevoNombre",
-    "theme": "dark"
-}
+- MongoDB (Base de datos)
+- Mongo Express (Interfaz de administración de MongoDB)
+- Backend (API REST en Node.js)
+- Frontend (Aplicación React)
+- Script de carga inicial (seed_db)
+
+### 4. Acceder a la Aplicación
+
+- Frontend: http://localhost:5173
+- Backend (API): http://localhost:3000
+- Mongo Express: http://localhost:8081
+
+---
+
+## Endpoints de la Aplicación
+
+### Autenticación
+
+```
+POST   /login              → Iniciar sesión con JWT
+POST   /register           → Registrar nuevo usuario
+POST   /logout             → Cerrar sesión
+GET    /check              → Verificar autenticación (requiere token)
+POST   /google-login       → Iniciar sesión con Google Firebase
+DELETE /delete             → Eliminar cuenta de usuario
 ```
 
-## 📁 Proyectos
+### Bloques de Contenido
 
-### Crear Proyecto
-```http
-POST /api/projects
-Authorization: Bearer {token}
-Content-Type: multipart/form-data
+(Protegido por autenticación)
 
-Form-Data:
-- title: "Mi Proyecto"
-- description: "Descripción del proyecto"
-- coverImage: [archivo de imagen] (opcional)
-
-{
-    "title": "proyecto 1",
-    "description": "dark"
-}
+```
+POST   /                  → Crear bloque
+GET    /:id               → Obtener bloque por ID
+PATCH  /:id               → Actualizar bloque
+DELETE /:id               → Eliminar bloque
+POST   /upload-media      → Subir archivo multimedia
 ```
 
-### Obtener Proyectos
-```http
-GET /api/projects
-Authorization: Bearer {token}
+### Invitaciones
+
+```
+POST   /                  → Crear invitación
+GET    /                  → Obtener todas las invitaciones del usuario
+DELETE /:id               → Eliminar invitación
 ```
 
-### Obtener Proyecto Específico
-```http
-GET /api/projects/{projectId}
-Authorization: Bearer {token}
+### Páginas
+
+```
+POST   /                  → Crear página
+GET    /:id               → Obtener página por ID
+PATCH  /:id               → Editar página
+DELETE /:id               → Eliminar página
 ```
 
-### Actualizar Proyecto
-```http
-PUT /api/projects/{projectId}
-Authorization: Bearer {token}
-Content-Type: multipart/form-data
+### Permisos
 
-Form-Data:
-- title: "Nuevo Título"
-- description: "Nueva descripción"
-- coverImage: [archivo de imagen] (opcional)
+```
+POST   /                  → Asignar permiso a usuario
+GET    /:projectId        → Obtener permisos de un proyecto
+PATCH  /:id               → Actualizar permiso
+DELETE /:id               → Eliminar permiso
 ```
 
-### Eliminar Proyecto
-```http
-DELETE /api/projects/{projectId}
-Authorization: Bearer {token}
+### Proyectos
+
+```
+POST   /                      → Crear proyecto (con imagen)
+GET    /                      → Obtener todos los proyectos
+GET    /:id                   → Obtener un proyecto por ID
+PATCH  /:id                   → Editar proyecto (con imagen)
+DELETE /:id                   → Eliminar proyecto
 ```
 
-## 📄 Páginas
+### Búsqueda
 
-### Crear Página
-```http
-POST /api/pages
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-    "projectId": "project123",
-    "title": "Nueva Página"
-}
+```
+GET    /                     → Buscar contenido
 ```
 
-### Obtener Páginas
-```http
-GET /api/pages?projectId=project123
-Authorization: Bearer {token}
+### Usuarios
+
+```
+GET    /me                   → Obtener perfil del usuario autenticado
+PATCH  /:id                  → Editar usuario (con avatar)
+GET    /:id                  → Obtener usuario por ID
 ```
 
-### Actualizar Página
-```http
-PUT /api/pages/{pageId}
-Authorization: Bearer {token}
-Content-Type: application/json
+---
 
-{
-    "title": "Título Actualizado"
-}
-```
+Notas:
 
-### Eliminar Página
-```http
-DELETE /api/pages/{pageId}
-Authorization: Bearer {token}
-```
+- Todas las rutas excepto login y register requieren token JWT.
+- Las rutas con subida de archivos usan `multer`.
+- Las variables de entorno están preconfiguradas en `docker-compose.yml`, con soporte para `.env`.
 
-## 📝 Contenido
 
-### Crear Bloque
-```http
-POST /api/content
-Authorization: Bearer {token}
-Content-Type: application/json
 
-{
-    "pageId": "page123",
-    "type": "text",
-    "content": "Contenido del bloque",
-    "order": 1
-}
-```
+---
 
-### Obtener Bloque
-```http
-GET /api/content/{blockId}
-Authorization: Bearer {token}
-```
+## Inicialización de la Base de Datos
 
-### Actualizar Bloque
-```http
-PUT /api/content/{blockId}
-Authorization: Bearer {token}
-Content-Type: application/json
+Se incluye un servicio especial llamado `seed_db`, encargado de ejecutar un script de inicialización que carga datos básicos en la base de datos. 
 
-{
-    "content": "Nuevo contenido",
-    "order": 2
-}
-```
+### Usuarios de prueba
 
-### Eliminar Bloque
-```http
-DELETE /api/content/{blockId}
-Authorization: Bearer {token}
-```
+Puedes iniciar sesión en la aplicación con cualquiera de los siguientes usuarios:
 
-## 🔑 Permisos
+- Usuario: AliceSmith  
+- Usuario: BobJohnson  
+- Usuario: CarolWhite  
 
-### Crear Permiso
-```http
-POST /api/permissions
-Authorization: Bearer {token}
-Content-Type: application/json
+**Contraseña para todos:** `123456`
 
-{
-    "projectId": "project123",
-    "userId": "user123",
-    "rol": "editor"
-}
-```
+### Acceso a Mongo Express
 
-### Obtener Permisos del Proyecto
-```http
-GET /api/permissions/{projectId}
-Authorization: Bearer {token}
-```
+Credenciales por defecto para Mongo Express:
 
-### Eliminar Permiso
-```http
-DELETE /api/permissions/{permissionId}
-Authorization: Bearer {token}
-```
+- Usuario: `admin`  
+- Contraseña: `123456`
 
-## 🔍 Búsqueda
+---
 
-### Buscar Contenido
-```http
-GET /api/search?query=término
-Authorization: Bearer {token}
-```
-
-## ✉️ Invitaciones
-
-### Crear Invitación
-```http
-POST /api/invitations
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-    "email": "invitado@email.com",
-    "projectId": "project123",
-    "rol": "editor"
-}
-```
-
-### Aceptar/Rechazar Invitación
-```http
-PUT /api/invitations/{token}
-Content-Type: application/json
-
-{
-    "status": "accepted" // o "rejected"
-}
-```
-
-## Códigos de Respuesta
-
-- `200`: Operación exitosa
-- `201`: Recurso creado
-- `400`: Error en la solicitud
-- `401`: No autorizado
-- `403`: Prohibido
-- `404`: No encontrado
-- `500`: Error del servidor
