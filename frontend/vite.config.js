@@ -13,8 +13,6 @@ export default defineConfig({
     },
     allowedHosts: [
       'front-production-0596.up.railway.app'
-    ],
-    // 🔧 Esta es la línea que importa para rutas tipo /project/12
-    historyApiFallback: true 
+    ]
   }
 })
