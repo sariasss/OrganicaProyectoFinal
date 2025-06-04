@@ -251,28 +251,7 @@ export const SortableBlockItem = ({
                                             [&_.ql-container]:!bg-primary-dark
                                             [&_.ql-container]:!border-secondary-dark
                                             
-                                            /* Default icon/text color */
-                                            [&_.ql-toolbar_button]:!text-gray-100
-                                            [&_.ql-toolbar_button]:![stroke:theme(colors.gray.100)]
-                                            [&_.ql-toolbar_button]:![fill:theme(colors.gray.100)]
-                                            [&_.ql-toolbar_.ql-picker-label]:!text-gray-100
-                                            [&_.ql-toolbar_.ql-picker-label]:![stroke:theme(colors.gray.100)]
-                                            [&_.ql-toolbar_.ql-picker-label]:![fill:theme(colors.gray.100)]
-
-                                            /* Active/Selected icon/text color */
-                                            [&_.ql-toolbar_.ql-active]:!text-pink-300
-                                            [&_.ql-toolbar_.ql-active]:![stroke:theme(colors.pink.300)]
-                                            [&_.ql-toolbar_.ql-active]:![fill:theme(colors.pink.300)]
-
-                                            /* Hover icon/text color */
-                                            [&_.ql-toolbar_button:hover:not(.ql-active)]:!text-pink-300
-                                            [&_.ql-toolbar_button:hover:not(.ql-active)]:![stroke:theme(colors.pink.300)]
-                                            [&_.ql-toolbar_button:hover:not(.ql-active)]:![fill:theme(colors.pink.300)]
-                                            
-                                            /* Dropdown menus */
-                                            [&_.ql-picker-options]:!bg-secondary-dark
-                                            [&_.ql-picker-item]:!text-gray-100
-                                            [&_.ql-picker-item:hover]:!bg-gray-700
+                                            text-white
                                         `}
                                         placeholder="Escribe tu contenido aquí..."
                                     />
