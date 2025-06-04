@@ -31,3 +31,10 @@
   height: auto;
   display: block;
 }
+.ql-editor video {
+  pointer-events: auto !important;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}

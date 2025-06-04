@@ -13,12 +13,12 @@ class CustomVideo extends Video {
     static tagName = 'video';
 
     static create(value) {
-        const node = super.create(value);
+        const node = document.createElement('video');
         node.setAttribute('src', value);
-        node.setAttribute('controls', 'controls');
-        node.setAttribute('playsinline', true);
+        node.setAttribute('controls', '');
+        node.setAttribute('playsinline', '');
         node.setAttribute('preload', 'auto');
-        node.setAttribute('style', 'width: 100%; height: auto; max-width: 100%;');
+        node.setAttribute('style', 'width: 100%; height: auto; max-width: 100%; display: block;');
         return node;
     }
 
