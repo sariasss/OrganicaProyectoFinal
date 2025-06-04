@@ -46,6 +46,10 @@ app.get("/", (req, res) => {
     res.json({ message: "API funcionando" });
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Algo salió mal!' });

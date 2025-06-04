@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
-  base: './',
+  base: './', // <-- importante si tu app se sirve en subrutas o para evitar errores en producción
   plugins: [react(), tailwindcss()],
   server: {
     host: '0.0.0.0',
@@ -11,13 +11,8 @@ export default defineConfig({
     watch: {
       usePolling: true,
     },
+     allowedHosts: [
+      'front-production-0596.up.railway.app/'
+    ]
   },
-  // 👇 Esta es la clave para el modo SPA (especialmente al hacer reload en rutas internas)
-  build: {
-    rollupOptions: {
-      input: './index.html',
-    },
-  },
-  // 👇 Y en producción, si usas un servidor como Nginx o Netlify
-  // asegúrate de redirigir todo a index.html (esto ya lo haces en el server, no aquí)
 })
