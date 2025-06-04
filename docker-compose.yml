@@ -1,9 +1,50 @@
 version: "3.8"
 
 services:
-  mongodb: # Renombrado de 'mongotfg' para claridad y consistencia con MONGODB_URL
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - /app/node_modules
+      - ./uploads:/app/uploads
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGO_URL=mongodb://root:example@mongo:27017/organica_db?authSource=admin
+      - CORS_ORIGIN=https://front-production-0596.up.railway.app
+      - JWT_SECRET=your_jwt_secret_here
+      - AVATAR_API=https://api.dicebear.com/5.x/initials/svg?seed=
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend 
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BASE_URL=https://organicaproyectofinal-production-d5a4.up.railway.app
+      - VITE_BASE_URL_IMAGE=https://organicaproyectofinal-production-d5a4.up.railway.app
+      - VITE_IDPROJECT=organica-9511b
+      - VITE_API_KEY=AIzaSyAbCZiZjgah89GVPjVewbbbFYMb7vopbQc
+      - VITE_AUTH_DOMAIN=organica-9511b.firebaseapp.com
+      - VITE_STORAGE_BUCKET=organica-9511b.appspot.com
+      - VITE_MESSAGING_SENDER_ID=704139277174
+      - VITE_APP_ID=1:704139277174:web:86aebf165f5b6736d84057
+      - DICEBEAR_API_BASE_URL=https://api.dicebear.com/5.x/initials/svg?seed=
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  mongo:
     image: mongo:latest
-    container_name: mongo # Mantén el nombre del contenedor para no cambiar dependencias en otros lados
+    container_name: mongo
     ports:
       - "27017:27017"
     environment:
@@ -20,82 +61,18 @@ services:
       retries: 5
       start_period: 40s
 
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    volumes:
-      - ./backend:/app # Monta tu directorio backend en /app
-      - /app/node_modules # Impide que el volumen local sobrescriba los node_modules del contenedor
-      - ./uploads:/app/uploads
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - MONGO_URL=mongodb://mongo:VkJVCQJSMqjQHjCCSKuKfIMtSBjHRxhA@mongodb.railway.internal:27017 # **Usa el nombre del servicio 'mongodb' como host**
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173} # Lee del .env, con fallback
-      - JWT_SECRET=${JWT_SECRET:-super_secret_dev_key} # Lee del .env, con fallback
-      - AVATAR_API=${AVATAR_API:-https://api.dicebear.com/5.x/initials/svg?seed=} # Lee del .env, con fallback
-      - BACKEND_URL=http://localhost:3000 # Necesario si tu User model usa process.env.BACKEND_URL
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - app-network
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "5173:5173"
-    environment:
-      # Asegúrate de que estas variables se mapeen correctamente a tu frontend
-      - VITE_BASE_URL=https://organicaproyectofinal-production-d5a4.up.railway.app
-      - VITE_BASE_URL_IMAGE=https://organicaproyectofinal-production-d5a4.up.railway.app
-      - VITE_IDPROJECT=organica-9511b
-      - VITE_API_KEY=AIzaSyAbCZiZjgah89GVPjVewbbbFYMb7vopbQc
-      - VITE_AUTH_DOMAIN=organica-9511b.firebaseapp.com
-      - VITE_STORAGE_BUCKET=organica-9511b.appspot.com
-      - VITE_MESSAGING_SENDER_ID=704139277174
-      - VITE_APP_ID=1:704139277174:web:86aebf165f5b6736d84057
-    depends_on:
-      - backend
-    networks:
-      - app-network
-
   mongo-express:
     image: mongo-express
     container_name: mongo-express
     ports:
       - "8081:8081"
     environment:
-      ME_CONFIG_MONGO_URL: mongodb://mongo:VkJVCQJSMqjQHjCCSKuKfIMtSBjHRxhA@mongodb.railway.internal:27017
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/organica_db?authSource=admin
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: 123456
     depends_on:
-      mongodb:
+      mongo:
         condition: service_healthy
-    networks:
-      - app-network
-
-  # --- Servicio para el script de seeding ---
-  seed_db:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: seed_db_container
-    environment:
-      - MONGO_URL=mongodb://mongo:VkJVCQJSMqjQHjCCSKuKfIMtSBjHRxhA@mongodb.railway.internal:27017 # Pasa la MONGODB_URL
-      - BACKEND_URL=http://localhost:3000 # Pasa la URL del backend si tu modelo User la usa
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - /app/node_modules # Asegura que los node_modules del contenedor no sean sobrescritos
-    command: ["node", "/app/src/scripts/script.js"] # Ruta del script dentro del contenedor
-    restart: "no"
     networks:
       - app-network
 
