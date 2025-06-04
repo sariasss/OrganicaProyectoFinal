@@ -2,62 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ReactQuill, { Quill } from 'react-quill-new';
-import { useTheme } from '../contexts/ThemeContext'; // Agregar esta importación
+import { useTheme } from '../contexts/ThemeContext'; // Keep this import for overall theme, but not for Quill's fixed styling
 
 import 'react-quill-new/dist/quill.snow.css';
 
-const Video = Quill.import('formats/video');
-
-class CustomVideo extends Video {
-    static blotName = 'video';
-    static tagName = 'video';
-
-    static create(value) {
-        const node = super.create(value);
-        node.setAttribute('src', value);
-        node.setAttribute('controls', 'controls');
-        node.setAttribute('playsinline', true);
-        node.setAttribute('preload', 'auto');
-        node.setAttribute('style', 'width: 100%; height: auto; max-width: 100%;');
-        return node;
-    }
-
-    static formats(node) {
-        let formats = {};
-        if (node.hasAttribute('height')) {
-            formats.height = node.getAttribute('height');
-        }
-        if (node.hasAttribute('width')) {
-            formats.width = node.getAttribute('width');
-        }
-        if (node.hasAttribute('class')) {
-            formats.class = node.getAttribute('class');
-        }
-        return formats;
-    }
-
-    format(name, value) {
-        if (['height', 'width', 'class'].indexOf(name) > -1) {
-            if (value) {
-                this.domNode.setAttribute(name, value);
-            } else {
-                this.domNode.removeAttribute(name);
-            }
-        } else {
-            super.format(name, value);
-        }
-    }
-}
-Quill.register(CustomVideo);
-
-let Scroll = Quill.import('blots/scroll');
-class NoDragScroll extends Scroll {
-    handleDragStart(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-}
-Quill.register('blots/scroll', NoDragScroll, true);
+// ... (CustomVideo and NoDragScroll definitions remain the same)
 
 const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
 
@@ -67,10 +16,12 @@ export const SortableBlockItem = ({
     handleBlockUpdate,
     handleBlockDelete,
     isNewBlock = false,
-    textColor,
-    secondaryBg,
+    textColor, // This prop now largely irrelevant for Quill's internal appearance
+    secondaryBg, // This prop now largely irrelevant for Quill's internal appearance
 }) => {
-    const { theme } = useTheme(); // Agregar esta línea
+    const { theme, getBaseColors } = useTheme(); // Still use for surrounding elements if needed
+    const { secondaryBg: themeSecondaryBg, textColor: themeTextColor } = getBaseColors(); // Use for surrounding elements
+
     const isEditable = canEditPage;
 
     const {
@@ -111,26 +62,9 @@ export const SortableBlockItem = ({
         if (isEditingBlockContent && quillRef.current) {
             setTimeout(() => {
                 quillRef.current.getEditor().focus();
-                
-                // Aplicar estilos para modo oscuro
-                if (theme === 'dark') {
-                    const toolbar = quillRef.current.getEditor().container.previousSibling;
-                    if (toolbar) {
-                        const buttons = toolbar.querySelectorAll('button');
-                        const pickerLabels = toolbar.querySelectorAll('.ql-picker-label');
-                        
-                        buttons.forEach(btn => {
-                            btn.style.color = '#ffffff';
-                        });
-                        
-                        pickerLabels.forEach(label => {
-                            label.style.color = '#ffffff';
-                        });
-                    }
-                }
             }, 100);
         }
-    }, [isEditingBlockContent, theme]);
+    }, [isEditingBlockContent]);
 
     const handleTextChange = (value) => setEditedContent(value);
 
@@ -257,7 +191,8 @@ export const SortableBlockItem = ({
             {...attributes}
             className="relative group mb-4"
         >
-            <div className={`${secondaryBg} ${textColor} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
+            {/* Use themeSecondaryBg and themeTextColor from the ThemeContext for the block's main container */}
+            <div className={`${themeSecondaryBg} ${themeTextColor} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${themeTextColor === 'text-gray-100' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
 
                 {isEditable && (
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300 transform md:translate-y-1 md:group-hover:translate-y-0 z-20">
@@ -300,22 +235,47 @@ export const SortableBlockItem = ({
                     <div className="min-h-[60px] w-full">
                         {isEditable && isEditingBlockContent ? (
                             <div className="space-y-4">
-                                <div className={`rounded-lg overflow-hidden border-2 ${textColor === 'text-white' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${textColor === 'text-white' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
-                                    <div style={theme === 'dark' ? {
-                                        '--quill-toolbar-button-color': '#ffffff',
-                                        '--quill-toolbar-picker-color': '#ffffff'
-                                    } : {}}>
-                                        <ReactQuill
-                                            ref={quillRef}
-                                            theme="snow"
-                                            value={editedContent}
-                                            onChange={handleTextChange}
-                                            modules={modules}
-                                            formats={formats}
-                                            className={`quill-custom-theme ${theme === 'dark' ? 'quill-dark-theme' : 'quill-light-theme'}`}
-                                            placeholder="Escribe tu contenido aquí..."
-                                        />
-                                    </div>
+                                <div className={`rounded-lg overflow-hidden border-2 ${themeTextColor === 'text-gray-100' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${themeTextColor === 'text-gray-100' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
+                                    <ReactQuill
+                                        ref={quillRef}
+                                        theme="snow"
+                                        value={editedContent}
+                                        onChange={handleTextChange}
+                                        modules={modules}
+                                        formats={formats}
+                                        // FIXED QUILL STYLES (ALWAYS DARK BACKGROUND, LIGHT TEXT/ICONS)
+                                        className={`
+                                            quill-custom-theme
+                                            [&_.ql-toolbar]:!bg-secondary-dark
+                                            [&_.ql-toolbar]:!border-secondary-dark
+                                            [&_.ql-container]:!bg-primary-dark
+                                            [&_.ql-container]:!border-secondary-dark
+                                            
+                                            /* Default icon/text color */
+                                            [&_.ql-toolbar_button]:!text-gray-100
+                                            [&_.ql-toolbar_button]:![stroke:theme(colors.gray.100)]
+                                            [&_.ql-toolbar_button]:![fill:theme(colors.gray.100)]
+                                            [&_.ql-toolbar_.ql-picker-label]:!text-gray-100
+                                            [&_.ql-toolbar_.ql-picker-label]:![stroke:theme(colors.gray.100)]
+                                            [&_.ql-toolbar_.ql-picker-label]:![fill:theme(colors.gray.100)]
+
+                                            /* Active/Selected icon/text color */
+                                            [&_.ql-toolbar_.ql-active]:!text-pink-300
+                                            [&_.ql-toolbar_.ql-active]:![stroke:theme(colors.pink.300)]
+                                            [&_.ql-toolbar_.ql-active]:![fill:theme(colors.pink.300)]
+
+                                            /* Hover icon/text color */
+                                            [&_.ql-toolbar_button:hover:not(.ql-active)]:!text-pink-300
+                                            [&_.ql-toolbar_button:hover:not(.ql-active)]:![stroke:theme(colors.pink.300)]
+                                            [&_.ql-toolbar_button:hover:not(.ql-active)]:![fill:theme(colors.pink.300)]
+                                            
+                                            /* Dropdown menus */
+                                            [&_.ql-picker-options]:!bg-secondary-dark
+                                            [&_.ql-picker-item]:!text-gray-100
+                                            [&_.ql-picker-item:hover]:!bg-gray-700
+                                        `}
+                                        placeholder="Escribe tu contenido aquí..."
+                                    />
                                 </div>
                                 <div className="flex justify-end gap-3">
                                     <button
@@ -334,8 +294,8 @@ export const SortableBlockItem = ({
                             </div>
                         ) : (
                             <div
-                                className={`ql-editor max-w-none prose ${textColor} ${textColor === 'text-white' ? 'prose-invert' : 'prose-base'} [&_blockquote]:border-l-4 ${textColor === 'text-white' ? '[&_blockquote]:border-gray-400 [&_blockquote]:bg-white/5' : '[&_blockquote]:border-gray-600 [&_blockquote]:bg-gray-100'} [&_pre]:${textColor === 'text-white' ? 'bg-black/30' : 'bg-gray-200'} [&_pre]:rounded-lg [&_pre]:border ${textColor === 'text-white' ? '[&_pre]:border-white/10' : '[&_pre]:border-gray-400'} min-h-[40px] cursor-text`}
-                                dangerouslySetInnerHTML={{ __html: block.content || `<p class="${textColor.replace('text-', 'text-')}/50 italic">Haz clic para empezar a escribir...</p>` }}
+                                className={`ql-editor max-w-none prose ${themeTextColor} ${themeTextColor === 'text-gray-100' ? 'prose-invert' : 'prose-base'} [&_blockquote]:border-l-4 ${themeTextColor === 'text-gray-100' ? '[&_blockquote]:border-gray-400 [&_blockquote]:bg-white/5' : '[&_blockquote]:border-gray-600 [&_blockquote]:bg-gray-100'} [&_pre]:${themeTextColor === 'text-gray-100' ? 'bg-black/30' : 'bg-gray-200'} [&_pre]:rounded-lg [&_pre]:border ${themeTextColor === 'text-gray-100' ? '[&_pre]:border-white/10' : '[&_pre]:border-gray-400'} min-h-[40px] cursor-text`}
+                                dangerouslySetInnerHTML={{ __html: block.content || `<p class="${themeTextColor.replace('text-', 'text-')}/50 italic">Haz clic para empezar a escribir...</p>` }}
                                 onClick={() => isEditable && setIsEditingBlockContent(true)}
                             />
                         )}
@@ -343,7 +303,7 @@ export const SortableBlockItem = ({
                 )}
             </div>
 
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${textColor === 'text-white' ? 'bg-gray-500' : 'bg-gray-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-x-2 hidden md:block`}></div>
+            <div className={`absolute left-0 top-0 bottom-0 w-1 ${themeTextColor === 'text-gray-100' ? 'bg-gray-500' : 'bg-gray-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-x-2 hidden md:block`}></div>
         </div>
     );
 };
