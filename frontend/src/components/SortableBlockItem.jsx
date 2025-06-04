@@ -105,6 +105,7 @@ export const SortableBlockItem = ({
         }
     }, [block.content]);
 
+
     useEffect(() => {
         if (isEditingBlockContent && quillRef.current) {
             setTimeout(() => {
@@ -128,14 +129,13 @@ export const SortableBlockItem = ({
     const modules = {
         toolbar: {
             container: [
-                [{ header: [1, 2, 3, 4, 5, 6, false] }],
                 [{ font: [] }],
                 [{ size: ['small', false, 'large', 'huge'] }],
                 ['bold', 'italic', 'underline', 'strike'],
                 [{ color: [] }, { background: [] }],
                 [{ script: 'sub' }, { script: 'super' }],
                 ['blockquote', 'code-block'],
-                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ list: 'ordered' }],
                 [{ indent: '-1' }, { indent: '+1' }],
                 [{ direction: 'rtl' }],
                 [{ align: [] }],
@@ -242,6 +242,8 @@ export const SortableBlockItem = ({
             <div className={`${secondaryBg} ${textColor} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
 
                 {isEditable && (
+                    // Adjusted positioning for mobile, using a bit more padding and top-right placement
+                    // and reduced button size for tighter packing.
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300 transform md:translate-y-1 md:group-hover:translate-y-0 z-20">
 
                         <button
@@ -281,131 +283,8 @@ export const SortableBlockItem = ({
                 {block.type === 'text' && (
                     <div className="min-h-[60px] w-full">
                         {isEditable && isEditingBlockContent ? (
-                            <div className="space-y-6">
-                                {/* Editor Container with Enhanced Styling */}
-                                <div className={`
-                                    relative overflow-hidden rounded-2xl border-2 shadow-2xl
-                                    ${textColor === 'text-white' 
-                                        ? 'border-gray-500/30 bg-gray-800/50 backdrop-blur-sm shadow-black/30' 
-                                        : 'border-gray-200 bg-white shadow-gray-300/50'
-                                    }
-                                    transition-all duration-300 hover:shadow-3xl
-                                    ${textColor === 'text-white' ? 'hover:border-gray-400/50' : 'hover:border-gray-300'}
-                                `}>
-                                    
-                                    {/* Decorative gradient line */}
-                                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                                    
-                                    <style jsx>{`
-                                        .quill-enhanced .ql-toolbar {
-                                            border: none !important;
-                                            padding: 16px 20px !important;
-                                            background: ${textColor === 'text-white' 
-                                                ? 'linear-gradient(135deg, rgba(31, 41, 55, 0.8) 0%, rgba(55, 65, 81, 0.6) 100%)' 
-                                                : 'linear-gradient(135deg, rgba(249, 250, 251, 0.9) 0%, rgba(243, 244, 246, 0.8) 100%)'
-                                            } !important;
-                                            backdrop-filter: blur(10px) !important;
-                                            border-bottom: 1px solid ${textColor === 'text-white' ? 'rgba(75, 85, 99, 0.3)' : 'rgba(229, 231, 235, 0.8)'} !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar .ql-formats {
-                                            margin-right: 20px !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar button {
-                                            width: 36px !important;
-                                            height: 36px !important;
-                                            border-radius: 8px !important;
-                                            margin: 2px !important;
-                                            transition: all 0.2s ease !important;
-                                            display: flex !important;
-                                            align-items: center !important;
-                                            justify-content: center !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar button:hover {
-                                            background: ${textColor === 'text-white' 
-                                                ? 'rgba(99, 102, 241, 0.2)' 
-                                                : 'rgba(99, 102, 241, 0.1)'
-                                            } !important;
-                                            transform: translateY(-1px) !important;
-                                            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25) !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar button.ql-active {
-                                            background: rgba(99, 102, 241, 0.15) !important;
-                                            color: rgb(99, 102, 241) !important;
-                                            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3) !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar .ql-picker {
-                                            border-radius: 8px !important;
-                                            overflow: hidden !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar .ql-picker-label {
-                                            padding: 6px 12px !important;
-                                            border-radius: 8px !important;
-                                            background: ${textColor === 'text-white' 
-                                                ? 'rgba(55, 65, 81, 0.5)' 
-                                                : 'rgba(255, 255, 255, 0.8)'
-                                            } !important;
-                                            transition: all 0.2s ease !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-toolbar .ql-picker-label:hover {
-                                            background: ${textColor === 'text-white' 
-                                                ? 'rgba(99, 102, 241, 0.2)' 
-                                                : 'rgba(99, 102, 241, 0.1)'
-                                            } !important;
-                                            transform: translateY(-1px) !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-container {
-                                            border: none !important;
-                                            font-size: 16px !important;
-                                            background: ${textColor === 'text-white' 
-                                                ? 'rgba(17, 24, 39, 0.3)' 
-                                                : 'rgba(255, 255, 255, 0.9)'
-                                            } !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-editor {
-                                            padding: 24px !important;
-                                            min-height: 200px !important;
-                                            color: ${textColor === 'text-white' ? '#f9fafb' : '#111827'} !important;
-                                            line-height: 1.7 !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-editor:focus {
-                                            outline: none !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-editor::before {
-                                            color: ${textColor === 'text-white' ? 'rgba(156, 163, 175, 0.7)' : 'rgba(107, 114, 128, 0.7)'} !important;
-                                            font-style: italic !important;
-                                        }
-                                        
-                                        /* Enhanced scrollbar */
-                                        .quill-enhanced .ql-editor::-webkit-scrollbar {
-                                            width: 8px !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-editor::-webkit-scrollbar-track {
-                                            background: ${textColor === 'text-white' ? 'rgba(31, 41, 55, 0.3)' : 'rgba(243, 244, 246, 0.5)'} !important;
-                                            border-radius: 4px !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-editor::-webkit-scrollbar-thumb {
-                                            background: linear-gradient(to bottom, rgb(99, 102, 241), rgb(139, 92, 246)) !important;
-                                            border-radius: 4px !important;
-                                        }
-                                        
-                                        .quill-enhanced .ql-editor::-webkit-scrollbar-thumb:hover {
-                                            background: linear-gradient(to bottom, rgb(79, 70, 229), rgb(124, 58, 237)) !important;
-                                        }
-                                    `}</style>
-                                    
+                            <div className="space-y-4">
+                                <div className={`rounded-lg overflow-hidden border-2 ${textColor === 'text-white' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${textColor === 'text-white' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
                                     <ReactQuill
                                         ref={quillRef}
                                         theme="snow"
@@ -413,44 +292,29 @@ export const SortableBlockItem = ({
                                         onChange={handleTextChange}
                                         modules={modules}
                                         formats={formats}
-                                        className="quill-enhanced"
-                                        placeholder="✨ Empieza a escribir algo increíble..."
+                                        className={`quill-custom-theme ${textColor === 'text-white' ? 'quill-dark-theme [&_.ql-toolbar_button]:!text-white [&_.ql-toolbar_.ql-picker-label]:!text-white' : 'quill-light-theme'}`}
+                                        placeholder="Escribe tu contenido aquí..."
                                     />
                                 </div>
-
-                                {/* Action Buttons with Enhanced Styling */}
-                                <div className="flex justify-end gap-4">
+                                <div className="flex justify-end gap-3">
                                     <button
                                         onClick={handleCancelTextBlock}
-                                        className="group relative px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-pink-500/25 bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white shadow-lg hover:shadow-xl hover:shadow-pink-500/25"
+                                        className="bg-pink-300 text-black rounded-full px-4 py-1 text-sm sm:px-6 sm:py-2 hover:bg-pink-500 transition-colors duration-200 font-medium shadow-md"
                                     >
-                                        <span className="relative z-10 flex items-center gap-2">
-                                            <svg className="w-4 h-4 transition-transform group-hover:rotate-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                            Cancelar
-                                        </span>
-                                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        Cancelar
                                     </button>
-                                    
                                     <button
                                         onClick={handleSaveTextBlock}
-                                        className="group relative px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-emerald-500/25 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg hover:shadow-xl hover:shadow-emerald-500/25"
+                                        className="bg-green-300 text-black rounded-full px-4 py-1 text-sm sm:px-6 sm:py-2 hover:bg-green-500 transition-colors duration-200 font-medium shadow-md"
                                     >
-                                        <span className="relative z-10 flex items-center gap-2">
-                                            <svg className="w-4 h-4 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            Guardar
-                                        </span>
-                                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                        Guardar
                                     </button>
                                 </div>
                             </div>
                         ) : (
                             <div
-                                className={`ql-editor max-w-none prose ${textColor} ${textColor === 'text-white' ? 'prose-invert' : 'prose-base'} [&_blockquote]:border-l-4 ${textColor === 'text-white' ? '[&_blockquote]:border-gray-400 [&_blockquote]:bg-white/5' : '[&_blockquote]:border-gray-600 [&_blockquote]:bg-gray-100'} [&_pre]:${textColor === 'text-white' ? 'bg-black/30' : 'bg-gray-200'} [&_pre]:rounded-lg [&_pre]:border ${textColor === 'text-white' ? '[&_pre]:border-white/10' : '[&_pre]:border-gray-400'} min-h-[40px] cursor-text transition-all duration-200 hover:bg-opacity-80 rounded-lg p-2`}
-                                dangerouslySetInnerHTML={{ __html: block.content || `<p class="${textColor.replace('text-', 'text-')}/50 italic">✨ Haz clic para empezar a escribir algo increíble...</p>` }}
+                                className={`ql-editor max-w-none prose ${textColor} ${textColor === 'text-white' ? 'prose-invert' : 'prose-base'} [&_blockquote]:border-l-4 ${textColor === 'text-white' ? '[&_blockquote]:border-gray-400 [&_blockquote]:bg-white/5' : '[&_blockquote]:border-gray-600 [&_blockquote]:bg-gray-100'} [&_pre]:${textColor === 'text-white' ? 'bg-black/30' : 'bg-gray-200'} [&_pre]:rounded-lg [&_pre]:border ${textColor === 'text-white' ? '[&_pre]:border-white/10' : '[&_pre]:border-gray-400'} min-h-[40px] cursor-text`}
+                                dangerouslySetInnerHTML={{ __html: block.content || `<p class="${textColor.replace('text-', 'text-')}/50 italic">Haz clic para empezar a escribir...</p>` }}
                                 onClick={() => isEditable && setIsEditingBlockContent(true)}
                             />
                         )}
@@ -458,8 +322,8 @@ export const SortableBlockItem = ({
                 )}
             </div>
 
-            {/* Enhanced Drag handle line */}
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${textColor === 'text-white' ? 'bg-gradient-to-b from-blue-400 to-purple-500' : 'bg-gradient-to-b from-blue-500 to-purple-600'} rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 shadow-lg hidden md:block`}></div>
+            {/* Drag handle line on the left side */}
+            <div className={`absolute left-0 top-0 bottom-0 w-1 ${textColor === 'text-white' ? 'bg-gray-500' : 'bg-gray-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-x-2 hidden md:block`}></div>
         </div>
     );
 };
