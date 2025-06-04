@@ -19,7 +19,7 @@ export const SortableBlockItem = ({
     textColor, // This prop now largely irrelevant for Quill's internal appearance
     secondaryBg, // This prop now largely irrelevant for Quill's internal appearance
 }) => {
-    const { theme, getBaseColors } = useTheme(); // Still use for surrounding elements if needed
+    const { theme, getBaseColors, getBgColor } = useTheme(); // Still use for surrounding elements if needed
     const { secondaryBg: themeSecondaryBg, textColor: themeTextColor } = getBaseColors(); // Use for surrounding elements
 
     const isEditable = canEditPage;
@@ -235,7 +235,7 @@ export const SortableBlockItem = ({
                     <div className="min-h-[60px] w-full">
                         {isEditable && isEditingBlockContent ? (
                             <div className="space-y-4">
-                                <div className={`rounded-lg overflow-hidden border-2 ${themeTextColor === 'text-gray-100' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${themeTextColor === 'text-gray-100' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
+                                <div className={`rounded-lg overflow-hidden border-2 ${getBgColor()} ${themeTextColor === 'text-gray-100' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${themeTextColor === 'text-gray-100' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
                                     <ReactQuill
                                         ref={quillRef}
                                         theme="snow"
