@@ -243,14 +243,7 @@ export const SortableBlockItem = ({
                                         onChange={handleTextChange}
                                         modules={modules}
                                         formats={formats}
-                                        // FIXED QUILL STYLES (ALWAYS DARK BACKGROUND, LIGHT TEXT/ICONS)
-                                        className={`
-                                            quill-custom-theme
-                                            [&_.ql-toolbar]:!bg-secondary-light
-                                            [&_.ql-toolbar]:!border-secondary-dark
-                                            [&_.ql-container]:!bg-primary-dark
-                                            [&_.ql-container]:!border-secondary-light
-                                        `}
+                                       
                                         placeholder="Escribe tu contenido aquí..."
                                     />
                                 </div>
