@@ -16,7 +16,6 @@ services:
       - CORS_ORIGIN=https://front-production-0596.up.railway.app
       - JWT_SECRET=your_jwt_secret_here
       - AVATAR_API=https://api.dicebear.com/5.x/initials/svg?seed=
-      - RUN_SEED=true
     depends_on:
       - mongo
     networks:
