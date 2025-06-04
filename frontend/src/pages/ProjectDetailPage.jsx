@@ -286,33 +286,34 @@ const ProjectDetailPage = () => {
                         {canEditProject && (
                             <div className="flex gap-2 sm:gap-3">
                                 <button
-                                    onClick={() => {
-                                        if (isEditing) {
-                                            handleProjectUpdate();
-                                        }
-                                        setIsEditing(!isEditing);
-                                    }}
-                                    className={`flex-1 sm:flex-none rounded-full px-4 py-2.5 sm:px-6 sm:py-3 font-medium text-sm sm:text-base transition duration-300 ${
-                                        isEditing ? 'bg-green-500 text-white hover:bg-green-600' : `${secondaryBg} ${getHighlightTextColor()} hover:opacity-80`
-                                    }`}
+                                onClick={() => {
+                                    if (isEditing) {
+                                    handleProjectUpdate();
+                                    }
+                                    setIsEditing(!isEditing);
+                                }}
+                                className={`flex items-center justify-center gap-2 flex-1 sm:flex-none rounded-full px-4 py-2.5 sm:px-6 sm:py-3 font-medium text-sm sm:text-base transition duration-300 ${
+                                    isEditing ? 'bg-green-500 text-white hover:bg-green-600' : `${secondaryBg} ${getHighlightTextColor()} hover:opacity-80`
+                                }`}
                                 >
-                                    {isEditing ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <polyline points="20 6 9 17 4 12"/>
-                                            </svg>
-                                            <span className="hidden sm:inline">Guardar</span>
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                            </svg>
-                                            <span className="hidden sm:inline">Editar</span>
-                                        </span>
-                                    )}
+                                {isEditing ? (
+                                    <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polyline points="20 6 9 17 4 12"/>
+                                    </svg>
+                                    <span className="hidden sm:inline">Guardar</span>
+                                    </>
+                                ) : (
+                                    <>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                    <span className="hidden sm:inline">Editar</span>
+                                    </>
+                                )}
                                 </button>
+
                             </div>
                         )}
 
@@ -478,46 +479,48 @@ const ProjectDetailPage = () => {
                         {/* Layout móvil/tablet */}
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:hidden">
                             <button
-                                onClick={handleInviteClick}
-                                className={`
-                                    ${getBgColor()}
-                                    rounded-full
-                                    px-6 py-3
-                                    sm:px-8 sm:py-4
-                                    font-medium
-                                    text-sm sm:text-base
-                                    hover:opacity-80
-                                    transition
-                                    duration-300
-                                    transform
-                                    hover:scale-105
-                                    ${theme === 'light' ? 'text-white' : "text-black"}
-                                    flex items-center justify-center gap-2
-                                `.trim()}
+                            onClick={handleInviteClick}
+                            className={`
+                                ${getBgColor()}
+                                flex items-center justify-center gap-2
+                                rounded-full
+                                px-6 py-3
+                                sm:px-8 sm:py-4
+                                font-medium
+                                text-sm sm:text-base
+                                hover:opacity-80
+                                transition
+                                duration-300
+                                transform
+                                hover:scale-105
+                                ${theme === 'light' ? 'text-white' : 'text-black'}
+                            `.trim()}
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" className="sm:w-5 sm:h-5">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                    <circle cx="9" cy="7" r="4"/>
-                                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                                </svg>
-                                Invitar colaboradores
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            </svg>
+                            Invitar colaboradores
                             </button>
 
+
                             <button
-                                onClick={handleDeleteProjectClick}
-                                className="bg-red-600 text-white rounded-full px-6 py-3 sm:px-8 sm:py-4 font-medium text-sm sm:text-base hover:bg-red-700 transition duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
-                                title="Eliminar proyecto"
+                            onClick={handleDeleteProjectClick}
+                            className="flex items-center justify-center gap-2 bg-red-600 text-white rounded-full px-6 py-3 sm:px-8 sm:py-4 font-medium text-sm sm:text-base hover:bg-red-700 transition duration-300 transform hover:scale-105"
+                            title="Eliminar proyecto"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
-                                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5">
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                    <line x1="10" y1="11" x2="10" y2="17" />
-                                    <line x1="14" y1="11" x2="14" y2="17" />
-                                </svg>
-                                Eliminar proyecto
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" stroke="currentColor"
+                                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                <line x1="10" y1="11" x2="10" y2="17" />
+                                <line x1="14" y1="11" x2="14" y2="17" />
+                            </svg>
+                            Eliminar proyecto
                             </button>
+
                         </div>
 
                         {/* Layout desktop (original) */}
