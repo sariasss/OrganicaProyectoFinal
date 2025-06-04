@@ -63,6 +63,14 @@ const ProjectDetailPage = () => {
     );
 
     useEffect(() => {
+        // Solo ejecutar si tenemos el ID del proyecto y el usuario está disponible
+        if (!id || !user) {
+            if (!user) {
+                setLoading(true); // Mantener loading si no hay usuario aún
+            }
+            return;
+        }
+
         const fetchProjectDetails = async () => {
             try {
                 setLoading(true);
@@ -81,8 +89,8 @@ const ProjectDetailPage = () => {
             }
         };
 
-        if (id) fetchProjectDetails();
-    }, [id, user?._id]);
+        fetchProjectDetails();
+    }, [id, user]); // Cambié la dependencia a user completo en lugar de user?._id
 
     const defaultImageUrl = "/imagenes/default-cover.jpg";
     const coverImageUrl = project?.coverImage
@@ -534,6 +542,7 @@ const ProjectDetailPage = () => {
                                 Eliminar proyecto
                             </button>
                         </div>
+
 
                         {/* Layout desktop (original) */}
                         <div className="hidden lg:block">
