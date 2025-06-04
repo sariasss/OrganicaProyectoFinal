@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ReactQuill, { Quill } from 'react-quill-new';
+import { useTheme } from '../contexts/ThemeContext'; // Agregar esta importación
 
-import 'react-quill-new/dist/quill.snow.css'; // Make sure this is imported
+import 'react-quill-new/dist/quill.snow.css';
 
 const Video = Quill.import('formats/video');
 
@@ -69,6 +70,7 @@ export const SortableBlockItem = ({
     textColor,
     secondaryBg,
 }) => {
+    const { theme } = useTheme(); // Agregar esta línea
     const isEditable = canEditPage;
 
     const {
@@ -104,7 +106,6 @@ export const SortableBlockItem = ({
             setEditedContent(block.content || '');
         }
     }, [block.content]);
-
 
     useEffect(() => {
         if (isEditingBlockContent && quillRef.current) {
@@ -242,8 +243,6 @@ export const SortableBlockItem = ({
             <div className={`${secondaryBg} ${textColor} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
 
                 {isEditable && (
-                    // Adjusted positioning for mobile, using a bit more padding and top-right placement
-                    // and reduced button size for tighter packing.
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300 transform md:translate-y-1 md:group-hover:translate-y-0 z-20">
 
                         <button
@@ -292,7 +291,7 @@ export const SortableBlockItem = ({
                                         onChange={handleTextChange}
                                         modules={modules}
                                         formats={formats}
-                                        className={`quill-custom-theme ${textColor === 'text-white' ? 'quill-dark-theme [&_.ql-toolbar_button]:!text-white [&_.ql-toolbar_.ql-picker-label]:!text-white' : 'quill-light-theme'}`}
+                                        className={`quill-custom-theme ${theme === 'dark' ? 'quill-dark-theme [&_.ql-toolbar_button]:!text-white [&_.ql-toolbar_.ql-picker-label]:!text-white' : 'quill-light-theme'}`}
                                         placeholder="Escribe tu contenido aquí..."
                                     />
                                 </div>
@@ -322,7 +321,6 @@ export const SortableBlockItem = ({
                 )}
             </div>
 
-            {/* Drag handle line on the left side */}
             <div className={`absolute left-0 top-0 bottom-0 w-1 ${textColor === 'text-white' ? 'bg-gray-500' : 'bg-gray-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-x-2 hidden md:block`}></div>
         </div>
     );
