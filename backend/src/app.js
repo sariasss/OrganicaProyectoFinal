@@ -33,14 +33,14 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 connectDB();
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/projects", projectRoutes);
-app.use("/api/pages", pageRoutes);
-app.use("/api/blocks", contentRoutes);
-app.use("/api/permissions", permissionRoutes);
-app.use("/api/search", searchRoutes);
-app.use("/api/invitations", invitationRoutes);
+app.use("/auth", authRoutes);
+app.use("/users", userRoutes);
+app.use("/projects", projectRoutes);
+app.use("/pages", pageRoutes);
+app.use("/blocks", contentRoutes);
+app.use("/permissions", permissionRoutes);
+app.use("/search", searchRoutes);
+app.use("/invitations", invitationRoutes);
 
 app.get("/", (req, res) => {
     res.json({ message: "API funcionando" });

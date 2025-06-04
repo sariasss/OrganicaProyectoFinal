@@ -158,7 +158,7 @@ export const SortableBlockItem = ({
                         formData.append('file', file);
 
                         try {
-                            const res = await fetch(`${VITE_BASE_URL_IMAGE}/api/blocks/upload-media`, {
+                            const res = await fetch(`${VITE_BASE_URL_IMAGE}/blocks/upload-media`, {
                                 method: 'POST',
                                 credentials: 'include',
                                 body: formData
@@ -207,7 +207,7 @@ export const SortableBlockItem = ({
                         const formData = new FormData();
                         formData.append('file', file);
                         try {
-                            const res = await fetch(`${VITE_BASE_URL_IMAGE}/api/blocks/upload-media`, {
+                            const res = await fetch(`${VITE_BASE_URL_IMAGE}/blocks/upload-media`, {
                                 method: 'POST',
                                 credentials: 'include',
                                 body: formData
