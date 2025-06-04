@@ -1,4 +1,4 @@
-# --- Etapa 1: Construcción de la aplicación React (Vite) ---
+# --- Etapa 1: Construcción de la aplicación React (Vite) --
 FROM node:18-alpine AS build
 
 WORKDIR /app
