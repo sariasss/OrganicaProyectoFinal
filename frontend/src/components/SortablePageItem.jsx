@@ -56,7 +56,7 @@ export const SortablePageItem = ({ page, canEditProject, handlePageEdit, handleP
             className="relative group mb-4"
         >
             {/* Contenedor de la tarjeta - adapted to theme colors */}
-            <div className={`flex items-center justify-between ${secondaryBg} border ${textColor === 'text-white' ? 'border-white/10' : 'border-gray-300'} p-4 rounded-lg transition-colors duration-200 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
+            <div className={`flex items-center justify-between ${secondaryBg} border ${textColor === 'text-white' ? 'border-white/10' : 'border-gray-300'} p-4 rounded-lg transition-colors duration-200 hover:${textColor === 'text-white' ? 'bg-white/10' : 'bg-gray-100'} hover:shadow-lg hover:shadow-black/20`}>
 
                 {/* Título o input de edición */}
                 {isEditingTitle && canEditProject ? (
@@ -89,7 +89,7 @@ export const SortablePageItem = ({ page, canEditProject, handlePageEdit, handleP
                     {/* Botón de arrastrar - smaller size for mobile */}
                     <button
                         {...listeners}
-                        // Reduced size to w-8 h-8 for better mobile fit
+                        style={{ touchAction: 'none' }} // 👈 NECESARIO para que funcione en móvil
                         className="w-8 h-8 bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group/drag"
                         title="Arrastrar página"
                     >

@@ -239,7 +239,7 @@ export const SortableBlockItem = ({
             {...attributes}
             className="relative group mb-4"
         >
-            <div className={`${secondaryBg} border ${textColor === 'text-white' ? 'border-white/10' : 'border-gray-300'} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
+            <div className={`${secondaryBg} ${textColor} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
 
                 {isEditable && (
                     // Adjusted positioning for mobile, using a bit more padding and top-right placement
