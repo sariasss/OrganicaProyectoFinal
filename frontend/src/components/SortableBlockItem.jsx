@@ -59,7 +59,7 @@ class NoDragScroll extends Scroll {
 }
 Quill.register('blots/scroll', NoDragScroll, true);
 
-const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
+const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'https://organicaproyectofinal-production-d5a4.up.railway.app';
 
 export const SortableBlockItem = ({
     block,
