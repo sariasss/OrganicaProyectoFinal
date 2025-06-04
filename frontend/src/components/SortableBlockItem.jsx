@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ReactQuill, { Quill } from 'react-quill-new';
+import { useTheme } from '../contexts/ThemeContext'; // Keep this import for overall theme, but not for Quill's fixed styling
 
-import 'react-quill-new/dist/quill.snow.css'; // Make sure this is imported
+import 'react-quill-new/dist/quill.snow.css';
 
 const Video = Quill.import('formats/video');
 
@@ -66,9 +67,12 @@ export const SortableBlockItem = ({
     handleBlockUpdate,
     handleBlockDelete,
     isNewBlock = false,
-    textColor,
-    secondaryBg,
+    textColor, // This prop now largely irrelevant for Quill's internal appearance
+    secondaryBg, // This prop now largely irrelevant for Quill's internal appearance
 }) => {
+    const { theme, getBaseColors, getBgColor } = useTheme(); // Still use for surrounding elements if needed
+    const { secondaryBg: themeSecondaryBg, textColor: themeTextColor } = getBaseColors(); // Use for surrounding elements
+
     const isEditable = canEditPage;
 
     const {
@@ -104,7 +108,6 @@ export const SortableBlockItem = ({
             setEditedContent(block.content || '');
         }
     }, [block.content]);
-
 
     useEffect(() => {
         if (isEditingBlockContent && quillRef.current) {
@@ -239,11 +242,10 @@ export const SortableBlockItem = ({
             {...attributes}
             className="relative group mb-4"
         >
-            <div className={`${secondaryBg} border ${textColor === 'text-white' ? 'border-white/10' : 'border-gray-300'} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${textColor === 'text-white' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
+            {/* Use themeSecondaryBg and themeTextColor from the ThemeContext for the block's main container */}
+            <div className={`${themeSecondaryBg} ${themeTextColor} rounded-xl p-4 sm:p-6 transition-all duration-300 hover:${themeTextColor === 'text-gray-100' ? 'bg-white/10 border-white/20' : 'bg-gray-100 border-gray-400'} hover:shadow-lg hover:shadow-black/20`}>
 
                 {isEditable && (
-                    // Adjusted positioning for mobile, using a bit more padding and top-right placement
-                    // and reduced button size for tighter packing.
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300 transform md:translate-y-1 md:group-hover:translate-y-0 z-20">
 
                         <button
@@ -284,7 +286,7 @@ export const SortableBlockItem = ({
                     <div className="min-h-[60px] w-full">
                         {isEditable && isEditingBlockContent ? (
                             <div className="space-y-4">
-                                <div className={`rounded-lg overflow-hidden border-2 ${textColor === 'text-white' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${textColor === 'text-white' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
+                                <div className={`rounded-lg overflow-hidden border-2 ${getBgColor()} ${themeTextColor === 'text-gray-100' ? 'border-gray-600' : 'border-gray-400'} shadow-lg ${themeTextColor === 'text-gray-100' ? 'shadow-gray-500/20' : 'shadow-gray-300/50'}`}>
                                     <ReactQuill
                                         ref={quillRef}
                                         theme="snow"
@@ -292,10 +294,9 @@ export const SortableBlockItem = ({
                                         onChange={handleTextChange}
                                         modules={modules}
                                         formats={formats}
-                                        className={`quill-custom-theme ${textColor === 'text-white' ? 'quill-dark-theme' : 'quill-light-theme'}`}
+                                       
                                         placeholder="Escribe tu contenido aquí..."
                                     />
-                                    {/* We will apply the Quill specific styles in index.css or a global CSS file */}
                                 </div>
                                 <div className="flex justify-end gap-3">
                                     <button
@@ -314,8 +315,8 @@ export const SortableBlockItem = ({
                             </div>
                         ) : (
                             <div
-                                className={`ql-editor max-w-none prose ${textColor} ${textColor === 'text-white' ? 'prose-invert' : 'prose-base'} [&_blockquote]:border-l-4 ${textColor === 'text-white' ? '[&_blockquote]:border-gray-400 [&_blockquote]:bg-white/5' : '[&_blockquote]:border-gray-600 [&_blockquote]:bg-gray-100'} [&_pre]:${textColor === 'text-white' ? 'bg-black/30' : 'bg-gray-200'} [&_pre]:rounded-lg [&_pre]:border ${textColor === 'text-white' ? '[&_pre]:border-white/10' : '[&_pre]:border-gray-400'} min-h-[40px] cursor-text`}
-                                dangerouslySetInnerHTML={{ __html: block.content || `<p class="${textColor.replace('text-', 'text-')}/50 italic">Haz clic para empezar a escribir...</p>` }}
+                                className={`ql-editor max-w-none prose ${themeTextColor} ${themeTextColor === 'text-gray-100' ? 'prose-invert' : 'prose-base'} [&_blockquote]:border-l-4 ${themeTextColor === 'text-gray-100' ? '[&_blockquote]:border-gray-400 [&_blockquote]:bg-white/5' : '[&_blockquote]:border-gray-600 [&_blockquote]:bg-gray-100'} [&_pre]:${themeTextColor === 'text-gray-100' ? 'bg-black/30' : 'bg-gray-200'} [&_pre]:rounded-lg [&_pre]:border ${themeTextColor === 'text-gray-100' ? '[&_pre]:border-white/10' : '[&_pre]:border-gray-400'} min-h-[40px] cursor-text`}
+                                dangerouslySetInnerHTML={{ __html: block.content || `<p class="${themeTextColor.replace('text-', 'text-')}/50 italic">Haz clic para empezar a escribir...</p>` }}
                                 onClick={() => isEditable && setIsEditingBlockContent(true)}
                             />
                         )}
@@ -323,8 +324,7 @@ export const SortableBlockItem = ({
                 )}
             </div>
 
-            {/* Drag handle line on the left side */}
-            <div className={`absolute left-0 top-0 bottom-0 w-1 ${textColor === 'text-white' ? 'bg-gray-500' : 'bg-gray-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-x-2 hidden md:block`}></div>
+            <div className={`absolute left-0 top-0 bottom-0 w-1 ${themeTextColor === 'text-gray-100' ? 'bg-gray-500' : 'bg-gray-400'} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -translate-x-2 hidden md:block`}></div>
         </div>
     );
 };

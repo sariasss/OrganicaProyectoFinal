@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+// Solo importamos updatePage y getPageById para el manejo del bloqueo
 import { getPageById, updatePage, deletePage } from '../services/pageService';
 import { createBlock, updateBlock, deleteBlock } from '../services/contentService';
-import { useAuth } from '../contexts/AuthContext'; // Asegúrate de la ruta correcta si es AuthContext
-import { useTheme } from '../contexts/ThemeContext'; // Importa useTheme
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 import {
     DndContext,
@@ -29,9 +30,8 @@ const ContentPage = () => {
     const { projectId, pageId } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
-    // **INTEGRACIÓN DEL TEMA:** Importar las funciones y valores necesarios de useTheme
     const { getHighlightTextColor, getBaseColors } = useTheme();
-    const { bgColor, textColor, secondaryBg } = getBaseColors(); // Obtener los colores del tema actual
+    const { bgColor, textColor, secondaryBg } = getBaseColors();
 
     const [page, setPage] = useState(null);
     const [project, setProject] = useState(null);
@@ -40,6 +40,11 @@ const ContentPage = () => {
     const [error, setError] = useState(null);
     const [isEditingPage, setIsEditingPage] = useState(false);
     const [editedPageTitle, setEditedPageTitle] = useState('');
+    // Nuevos estados para el mecanismo de bloqueo
+    const [isPageLockedByOther, setIsPageLockedByOther] = useState(false);
+    const [lockingUser, setLockingUser] = useState(null); // Para almacenar el nombre de usuario que bloquea
+
+    const isMounted = useRef(true); // Para evitar actualizaciones de estado en componentes desmontados
 
     const handleGoBack = () => navigate("/project/" + projectId);
 
@@ -50,29 +55,118 @@ const ContentPage = () => {
         })
     );
 
-    const canEditPage = page && project && (
+    const canEditPage = page && project && user && (
         String(project?.userId) === String(user._id) ||
         (project.permissions && project.permissions.some(p => String(p.userId) === String(user._id) && (p.rol === 'owner' || p.rol === 'editor')))
     );
 
-    const isPageOwner = page && project && (
+    const isPageOwner = page && project && user && (
         String(project?.userId) === String(user._id) ||
         (project.permissions && project.permissions.some(p => String(p.userId) === String(user._id) && p.rol === 'owner'))
     );
 
+    // --- Funciones para gestionar el bloqueo usando updatePage ---
+
+    const acquireLock = useCallback(async () => {
+        if (!user || !pageId) return false;
+        try {
+            // Intentamos "actualizar" la página para activar el bloqueo
+            const response = await updatePage(pageId, {
+                isEditing: true,
+                editingUser: user._id,
+                editingStartedAt: new Date(), // Esto se gestionará en el backend
+            });
+
+            if (isMounted.current) {
+                setPage(response.page); // Actualiza el estado de la página con los datos de bloqueo
+                setIsPageLockedByOther(false);
+                setLockingUser(null);
+                setError(null);
+            }
+            return true; // Bloqueo adquirido
+        } catch (err) {
+            console.error("Error al intentar adquirir el bloqueo:", err);
+            if (isMounted.current) {
+                // Si la respuesta es 409 (Conflict), significa que está bloqueada por otro
+                if (err.response && err.response.status === 409) {
+                    setIsPageLockedByOther(true);
+                    setLockingUser(err.response.data.editingUser || 'otro usuario');
+                    setError(err.response.data.message || 'Esta página ya está siendo editada por otro usuario.');
+                } else {
+                    setError("No se pudo obtener el bloqueo de la página. Inténtalo de nuevo.");
+                }
+            }
+            return false; // Bloqueo no adquirido
+        }
+    }, [pageId, user]);
+
+    const releaseLock = useCallback(async () => {
+        if (!user || !pageId) return;
+        try {
+            // Intentamos "actualizar" la página para liberar el bloqueo
+            await updatePage(pageId, {
+                isEditing: false,
+                editingUser: user._id, // Necesario para que el backend verifique quién la está desbloqueando
+                editingStartedAt: null,
+            });
+            if (isMounted.current) {
+                setIsPageLockedByOther(false);
+                setLockingUser(null);
+                setPage(prevPage => ({
+                    ...prevPage,
+                    isEditing: false,
+                    editingUser: null,
+                    editingStartedAt: null
+                }));
+            }
+        } catch (err) {
+            console.error("Error al intentar liberar el bloqueo:", err);
+            // Opcionalmente, informa al usuario si el desbloqueo falló por alguna razón
+        }
+    }, [pageId, user]);
+
+    // --- EFFECT HOOK PARA CARGAR DETALLES DE LA PÁGINA Y GESTIONAR EL BLOQUEO INICIAL ---
     useEffect(() => {
-        const fetchPageDetails = async () => {
+        const fetchAndCheckLock = async () => {
+            if (!pageId || !user?._id) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 setLoading(true);
-
                 const data = await getPageById(pageId);
-                setPage(data.page);
+                const fetchedPage = data.page;
+
+                setPage(fetchedPage);
+                setEditedPageTitle(fetchedPage.title);
+                setBlocks(data.blocks ? data.blocks.sort((a, b) => a.order - b.order) : []);
 
                 const dataProject = await getProjectById(projectId);
                 setProject(dataProject.project);
 
-                setEditedPageTitle(data.page.title);
-                setBlocks(data.blocks ? data.blocks.sort((a, b) => a.order - b.order) : []);
+                // Verificar el estado de bloqueo inicial
+                if (fetchedPage.isEditing) {
+                    if (String(fetchedPage.editingUser?._id || fetchedPage.editingUser) !== String(user._id)) {
+                        // La página está bloqueada por otro usuario
+                        setIsPageLockedByOther(true);
+                        setLockingUser(fetchedPage.editingUser ? fetchedPage.editingUser.username : 'otro usuario');
+                        setError(`Esta página ya está siendo editada por ${fetchedPage.editingUser ? fetchedPage.editingUser.username : 'otro usuario'}.`);
+                    } else {
+                        // Está bloqueada por el usuario actual (posible recarga)
+                        setIsPageLockedByOther(false);
+                        setLockingUser(null);
+                        setError(null);
+                        // Opcional: Podrías querer que el usuario se ponga en modo edición automáticamente si ya la tenía bloqueada.
+                        // setIsEditingPage(true);
+                    }
+                } else {
+                    // La página no está bloqueada
+                    setIsPageLockedByOther(false);
+                    setLockingUser(null);
+                    setError(null);
+                }
+
             } catch (err) {
                 console.error("Error al obtener los detalles de la página:", err);
                 setError("No se pudo cargar la página. Por favor, inténtalo de nuevo.");
@@ -81,18 +175,39 @@ const ContentPage = () => {
             }
         };
 
-        if (pageId && user?._id) {
-            fetchPageDetails();
+        fetchAndCheckLock();
+
+        // Cleanup: liberar el bloqueo cuando el componente se desmonte o el usuario salga
+        return () => {
+            isMounted.current = false;
+            // Solo liberar el bloqueo si lo adquirimos nosotros y no lo ha hecho otro
+            if (page && page.isEditing && String(page.editingUser?._id || page.editingUser) === String(user._id)) {
+                releaseLock();
+            }
+        };
+    }, [pageId, projectId, user, releaseLock]); // `releaseLock` en las dependencias
+
+    // --- Manejar la entrada/salida del modo edición ---
+    const handleToggleEditMode = async () => {
+        if (!isEditingPage) { // Si vamos a entrar en modo edición
+            const acquired = await acquireLock();
+            if (acquired) {
+                setIsEditingPage(true);
+            }
+        } else { // Si vamos a salir del modo edición
+            await handlePageUpdate(); // Guardar cambios si los hay
+            await releaseLock();
+            setIsEditingPage(false);
         }
-    }, [pageId, projectId, user?._id]);
+    };
 
     const handlePageUpdate = async () => {
         try {
             await updatePage(pageId, { title: editedPageTitle });
             setPage(prevPage => ({ ...prevPage, title: editedPageTitle }));
-            setIsEditingPage(false);
+            // No cambiamos isEditingPage aquí, se hace en handleToggleEditMode
         } catch (err) {
-            console.error("Error al actualizar la página:", err);
+            console.error("Error al actualizar el título de la página:", err);
             setError("Error al actualizar el título de la página.");
         }
     };
@@ -101,6 +216,11 @@ const ContentPage = () => {
         if (!isPageOwner) {
             alert("No tienes permisos para eliminar esta página.");
             return;
+        }
+        // Antes de eliminar, asegúrate de que no esté bloqueada por nadie más
+        if (page.isEditing && String(page.user._id) !== String(page.editingUser?._id || page.editingUser)) {
+             alert(`Esta página está actualmente bloqueada por ${lockingUser}. No se puede eliminar.`);
+             return;
         }
         if (window.confirm("¿Estás seguro de que quieres eliminar esta página y todo su contenido?")) {
             try {
@@ -142,7 +262,7 @@ const ContentPage = () => {
                 prevBlocks.map(block => {
                     if (block._id === blockId) {
                         const updatedContent = (type === 'image' && content instanceof File)
-                            ? block.content
+                            ? block.content // Mantener la URL de la imagen actual si se sube un archivo nuevo (la API la manejará)
                             : content;
                         return { ...block, content: updatedContent, order: order };
                     }
@@ -212,11 +332,28 @@ const ContentPage = () => {
     };
 
     if (loading) {
-        // Usar los colores del tema aquí también
         return <div className={`min-h-screen ${bgColor} ${textColor} flex justify-center items-center`}>Cargando página...</div>;
     }
 
-    if (error) {
+    // --- Mensaje de página bloqueada ---
+    if (isPageLockedByOther) {
+        return (
+            <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col justify-center items-center text-center p-4`}>
+                <h2 className="text-3xl font-bold text-red-500 mb-4">Página Bloqueada</h2>
+                <p className="text-xl mb-6">Esta página está actualmente siendo editada por **{lockingUser}**.</p>
+                <p className="text-lg mb-8">No puedes entrar en modo edición hasta que {lockingUser} termine o el bloqueo expire.</p>
+                <button
+                    onClick={handleGoBack}
+                    className={`${secondaryBg} ${getHighlightTextColor()} px-6 py-3 rounded-full text-lg font-medium transition duration-300 hover:opacity-80`}
+                >
+                    Volver a Proyectos
+                </button>
+                {error && <p className="text-red-500 mt-4">{error}</p>}
+            </div>
+        );
+    }
+
+    if (error && !isPageLockedByOther) { // Mostrar otros errores si no es por bloqueo
         return <div className={`min-h-screen ${bgColor} ${textColor} flex justify-center items-center text-red-500`}>{error}</div>;
     }
 
@@ -225,10 +362,9 @@ const ContentPage = () => {
     }
 
     return (
-        // Aplicar los colores del tema al contenedor principal
         <div className={`min-h-screen ${bgColor} ${textColor} flex flex-col`}>
             {/* Header */}
-            <div className={`relative h-35 flex items-center justify-center p-4 sm:p-6 `}> {/* Reduced padding for smaller screens */}
+            <div className={`relative h-35 flex items-center justify-center p-4 sm:p-6 `}>
                 <button onClick={handleGoBack} className={`p-2 rounded-full ${textColor} absolute top-4 left-4 z-50 transition hover:opacity-80`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -238,19 +374,14 @@ const ContentPage = () => {
                 <div className="absolute top-4 right-4 flex space-x-2">
                     {canEditPage && (
                         <button
-                            onClick={() => {
-                                if (isEditingPage) {
-                                    handlePageUpdate();
-                                }
-                                setIsEditingPage(!isEditingPage);
-                            }}
-                            className={`rounded-full px-3 py-1 text-sm sm:px-4 sm:py-2 font-medium transition duration-300 ${ // Smaller padding/text for mobile
+                            onClick={handleToggleEditMode} // Usar la nueva función
+                            className={`rounded-full px-3 py-1 text-sm sm:px-4 sm:py-2 font-medium transition duration-300 ${
                                 isEditingPage
-                                    ? `bg-green-500 text-white` // Direct text-white as getHighlightTextColor is for secondaryBg
+                                    ? `bg-green-500 text-white`
                                     : `${secondaryBg} ${getHighlightTextColor()} hover:opacity-80`
                             }`}
                         >
-                            {isEditingPage ? 'Guardar' : 'Modo Edición'}
+                            {isEditingPage ? 'Guardar Cambios y Salir' : 'Modo Edición'}
                         </button>
                     )}
 
@@ -259,6 +390,7 @@ const ContentPage = () => {
                             onClick={handlePageDelete}
                             className="bg-red-600 text-white rounded-full p-2 hover:bg-red-700 transition duration-300"
                             title="Eliminar página"
+                            disabled={isPageLockedByOther || (page.isEditing && String(page.editingUser?._id || page.editingUser) !== String(user._id))}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                         </button>
@@ -272,18 +404,18 @@ const ContentPage = () => {
                     isEditingPage ? (
                         <input
                             type="text"
-                            className={`text-3xl sm:text-5xl font-bold ${textColor} mb-4 ${secondaryBg} p-2 rounded-2xl text-center w-11/12 sm:w-auto mx-auto`} // Added w-11/12 and mx-auto for better input width on small screens
+                            className={`text-3xl sm:text-5xl font-bold ${textColor} mb-4 ${secondaryBg} p-2 rounded-2xl text-center w-11/12 sm:w-auto mx-auto`}
                             value={editedPageTitle}
                             onChange={(e) => setEditedPageTitle(e.target.value)}
                         />
                     ) : (
-                        <h1 className={`text-3xl sm:text-5xl font-bold ${textColor} mb-4 px-4`}>{page.title}</h1> // Added px-4 for title padding on small screens
+                        <h1 className={`text-3xl sm:text-5xl font-bold ${textColor} mb-4 px-4`}>{page.title}</h1>
                     )
                 )}
             </div>
 
             {/* Content Area */}
-            <div className={`flex-grow p-4 sm:px-16 md:px-28 lg:px-36 ${bgColor}`}> {/* Reduced padding for small screens */}
+            <div className={`flex-grow p-4 sm:px-16 md:px-28 lg:px-36 ${bgColor}`}>
                 <hr className={`border-t ${textColor === 'text-white' ? 'border-gray-600' : 'border-gray-400'} mb-6`} />
 
                 <DndContext
@@ -301,15 +433,14 @@ const ContentPage = () => {
                                     <SortableBlockItem
                                         key={block._id}
                                         block={block}
-                                        canEditPage={canEditPage && isEditingPage}
+                                        canEditPage={canEditPage && isEditingPage} // Solo permite editar si está en modo edición
                                         handleBlockUpdate={handleBlockUpdate}
                                         handleBlockDelete={handleBlockDelete}
-                                        // Pasar los colores del tema a los bloques para que también los utilicen
                                         bgColor={bgColor}
                                         textColor={textColor}
                                         secondaryBg={secondaryBg}
                                         getHighlightTextColor={getHighlightTextColor}
-                                        VITE_BASE_URL_IMAGE={VITE_BASE_URL_IMAGE} // Pasar la URL base para imágenes
+                                        VITE_BASE_URL_IMAGE={VITE_BASE_URL_IMAGE}
                                     />
                                 ))
                             ) : (

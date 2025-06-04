@@ -1,47 +1,9 @@
 version: "3.8"
 
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    volumes:
-      - /app/node_modules
-      - ./uploads:/app/uploads
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - MONGODB_URI=mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
-      - CORS_ORIGIN=http://localhost:5173 # Good practice to define this here
-    depends_on:
-      - mongotfg
-    networks:
-      - app-network
-
-  frontend: # <--- New service for your React frontend
-    build:
-      context: ./frontend # Assuming your React app is in a 'frontend' directory
-      dockerfile: Dockerfile # You'll create this Dockerfile
-    ports:
-      - "5173:5173" # Or whatever port your React app uses (e.g., 3000, 5173 for Vite)
-    environment:
-      - VITE_BASE_URL=http://localhost:3000/api
-      - VITE_BASE_URL_IMAGE=http://localhost:3000
-      - VITE_IDPROJECT=organica-9511b
-      - VITE_API_KEY=AIzaSyAbCZiZjgah89GVPjVewbbbFYMb7vopbQc
-      - VITE_AUTH_DOMAIN=organica-9511b.firebaseapp.com
-      - VITE_STORAGE_BUCKET=organica-9511b.appspot.com
-      - VITE_MESSAGING_SENDER_ID=704139277174
-      - VITE_APP_ID=1:704139277174:web:86aebf165f5b6736d84057
-    depends_on:
-      - backend # Frontend depends on the backend
-    networks:
-      - app-network
-
-  mongotfg:
+  mongodb: # Renombrado de 'mongotfg' para claridad y consistencia con MONGODB_URL
     image: mongo:latest
-    container_name: mongotfg
+    container_name: mongotfg # Mantén el nombre del contenedor para no cambiar dependencias en otros lados
     ports:
       - "27017:27017"
     environment:
@@ -58,18 +20,82 @@ services:
       retries: 5
       start_period: 40s
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app # Monta tu directorio backend en /app
+      - /app/node_modules # Impide que el volumen local sobrescriba los node_modules del contenedor
+      - ./uploads:/app/uploads
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGODB_URL=mongodb://root:example@mongodb:27017/organica_db?authSource=admin # **Usa el nombre del servicio 'mongodb' como host**
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173} # Lee del .env, con fallback
+      - JWT_SECRET=${JWT_SECRET:-super_secret_dev_key} # Lee del .env, con fallback
+      - AVATAR_API=${AVATAR_API:-https://api.dicebear.com/5.x/initials/svg?seed=} # Lee del .env, con fallback
+      - BACKEND_URL=http://localhost:3000 # Necesario si tu User model usa process.env.BACKEND_URL
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      # Asegúrate de que estas variables se mapeen correctamente a tu frontend
+      - VITE_BASE_URL=http://localhost:3000/api
+      - VITE_BASE_URL_IMAGE=http://localhost:3000
+      - VITE_IDPROJECT=organica-9511b
+      - VITE_API_KEY=AIzaSyAbCZiZjgah89GVPjVewbbbFYMb7vopbQc
+      - VITE_AUTH_DOMAIN=organica-9511b.firebaseapp.com
+      - VITE_STORAGE_BUCKET=organica-9511b.appspot.com
+      - VITE_MESSAGING_SENDER_ID=704139277174
+      - VITE_APP_ID=1:704139277174:web:86aebf165f5b6736d84057
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
   mongo-express:
     image: mongo-express
     container_name: mongo-express
     ports:
       - "8081:8081"
     environment:
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongotfg:27017/organica_db?authSource=admin
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/organica_db?authSource=admin
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: 123456
     depends_on:
-      mongotfg:
+      mongodb:
         condition: service_healthy
+    networks:
+      - app-network
+
+  # --- Servicio para el script de seeding ---
+  seed_db:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: seed_db_container
+    environment:
+      - MONGODB_URL=mongodb://root:example@mongodb:27017/organica_db?authSource=admin # Pasa la MONGODB_URL
+      - BACKEND_URL=http://localhost:3000 # Pasa la URL del backend si tu modelo User la usa
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules # Asegura que los node_modules del contenedor no sean sobrescritos
+    command: ["node", "/app/src/scripts/script.js"] # Ruta del script dentro del contenedor
+    restart: "no"
     networks:
       - app-network
 
