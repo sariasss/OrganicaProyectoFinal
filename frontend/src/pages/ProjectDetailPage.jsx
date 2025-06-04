@@ -4,23 +4,8 @@ import { deleteProject, getProjectById, updateProject } from '../services/projec
 import { updatePage, deletePage } from '../services/pageService';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-
-import {
-    DndContext,
-    closestCorners,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragOverlay,
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    rectSortingStrategy,
-} from '@dnd-kit/sortable';
-
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, rectSortingStrategy } from '@dnd-kit/sortable';
 import { SortablePageItem } from '../components/SortablePageItem';
 
 const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
@@ -63,14 +48,6 @@ const ProjectDetailPage = () => {
     );
 
     useEffect(() => {
-        // Solo ejecutar si tenemos el ID del proyecto y el usuario está disponible
-        if (!id || !user) {
-            if (!user) {
-                setLoading(true); // Mantener loading si no hay usuario aún
-            }
-            return;
-        }
-
         const fetchProjectDetails = async () => {
             try {
                 setLoading(true);
@@ -89,8 +66,8 @@ const ProjectDetailPage = () => {
             }
         };
 
-        fetchProjectDetails();
-    }, [id, user]); // Cambié la dependencia a user completo en lugar de user?._id
+        if (id) fetchProjectDetails();
+    }, [id, user?._id]);
 
     const defaultImageUrl = "/imagenes/default-cover.jpg";
     const coverImageUrl = project?.coverImage
@@ -542,7 +519,6 @@ const ProjectDetailPage = () => {
                                 Eliminar proyecto
                             </button>
                         </div>
-
 
                         {/* Layout desktop (original) */}
                         <div className="hidden lg:block">
