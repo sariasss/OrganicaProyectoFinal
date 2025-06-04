@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { updateUser } from '../services/userService'; // Assuming this service correctly sends the request
 import { useTheme } from '../contexts/ThemeContext';
 
 const ConfigPage = () => {
   const navigate = useNavigate();
-  const { user, logout, updateCurrentUser } = useAuth();
+  const { user, logout, setUser } = useAuth(); // Assuming setUser updates the user context correctly
 
   const {
     theme,
     highlightColor,
+    toggleTheme,
+    changeHighlightColor,
     getHighlightTextColor,
     getBorderColor,
     getBgColor,
@@ -28,26 +31,28 @@ const ConfigPage = () => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [selectedHighlightColor, setSelectedHighlightColor] = useState(highlightColor);
-  // Nuevo estado para forzar la actualización de la imagen
-  const [avatarKey, setAvatarKey] = useState(0);
+  // Add a state to force avatar re-render
+  const [avatarReloadKey, setAvatarReloadKey] = useState(0);
 
   useEffect(() => {
     if (user) {
       setUsername(user.username || '');
       setEmail(user.email || '');
       setSelectedHighlightColor(highlightColor);
-      setAvatarKey(prev => prev + 1);
+      // Increment key when user or highlightColor changes, to ensure avatar is reloaded
+      setAvatarReloadKey(prev => prev + 1);
     }
   }, [user, highlightColor]);
 
   const handleGoBack = () => navigate(-1);
 
   const VITE_BASE_URL_IMAGE = import.meta.env.VITE_BASE_URL_IMAGE || 'http://localhost:3000';
-  const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed=';
+  const DICEBEAR_API_BASE_URL = 'https://api.dicebear.com/5.x/initials/svg?seed='; // Define DiceBear API for default avatars
 
   const handleSaveUsername = async () => {
     try {
-      await updateCurrentUser({ username });
+      const updatedUser = await updateUser(user._id, { username });
+      setUser(updatedUser);
       setIsEditingUsername(false);
     } catch (err) {
       console.error('Error al guardar el nombre de usuario:', err);
@@ -56,7 +61,8 @@ const ConfigPage = () => {
 
   const handleSaveEmail = async () => {
     try {
-      await updateCurrentUser({ email });
+      const updatedUser = await updateUser(user._id, { email });
+      setUser(updatedUser);
       setIsEditingEmail(false);
     } catch (err) {
       console.error('Error al guardar el email:', err);
@@ -83,24 +89,15 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      console.log('FormData contenido:', [...formData.entries()]);
-      
-      // Guardar el avatar y esperar la respuesta
-      const updatedUser = await updateCurrentUser(formData);
-      console.log('Usuario actualizado:', updatedUser);
-      
+      const updatedUser = await updateUser(user._id, formData);
+      setUser(updatedUser); // Update user in context
+      setIsEditingAvatar(false);
       setAvatarFile(null);
       setPreviewUrl(null);
-      setIsEditingAvatar(false);
-      
-      // Forzar actualización múltiple para asegurar el cambio
-      setAvatarKey(prev => prev + 1);
-      
-      // Esperar un poco y forzar otra actualización
-      setTimeout(() => {
-        setAvatarKey(prev => prev + 1);
-      }, 500);
-      window.location.reload(); 
+
+      // Force avatar re-render by updating the key
+      setAvatarReloadKey(prev => prev + 1);
+
     } catch (err) {
       console.error('Error al guardar el avatar:', err);
     }
@@ -113,7 +110,8 @@ const ConfigPage = () => {
   const handleSaveHighlightColor = async () => {
     try {
       if (user?._id) {
-        await updateCurrentUser({ highlightColor: selectedHighlightColor });
+        // Assuming changeHighlightColor also updates the user context
+        await changeHighlightColor(selectedHighlightColor, user._id); 
         setShowThemeSelector(false);
       } else {
         console.error('ID de usuario no disponible para guardar el color de resaltado.');
@@ -126,8 +124,8 @@ const ConfigPage = () => {
   const toggleGlobalTheme = async () => {
     try {
       if (user?._id) {
-        const newTheme = theme === 'dark' ? 'light' : 'dark';
-        await updateCurrentUser({ theme: newTheme });
+        // Assuming toggleTheme also updates the user context
+        await toggleTheme(user._id); 
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
       }
@@ -143,25 +141,23 @@ const ConfigPage = () => {
 
   const colors = ["pink", "blue", "green", "purple"];
 
+  // Helper function to get the correct avatar source
   const getAvatarSrc = () => {
     if (previewUrl) {
-      return previewUrl; 
-    } 
-    if (user?.avatar) {      
+      return previewUrl;
+    }
+    if (user?.avatar) {
+      // If it's an external URL (e.g., Google, social media avatars)
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
-        // Agregar timestamp y avatarKey para evitar caché del navegador
-        return `${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
+        return `${user.avatar}?${avatarReloadKey}`; // Add key to force refresh
       }
-      
+      // If it's an uploaded avatar on your server
       if (user.avatar.includes('avatar-')) {
-        if (user.avatar.includes('/uploads/')) {
-          const cleanPath = user.avatar.replace('undefined', VITE_BASE_URL_IMAGE);
-          return `${cleanPath}?t=${Date.now()}&k=${avatarKey}`;
-        }
-        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?t=${Date.now()}&k=${avatarKey}`;
+        return `${VITE_BASE_URL_IMAGE}/uploads/avatars/${user.avatar}?${avatarReloadKey}`; // Add key to force refresh
       }
     }
-    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}?k=${avatarKey}`;
+    // Fallback to DiceBear if no avatar is set or URL is invalid
+    return `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}?${avatarReloadKey}`;
   };
 
   return (
@@ -228,12 +224,12 @@ const ConfigPage = () => {
             />
           ) : (
             <img
-              key={`avatar-${avatarKey}-${user?.avatar || 'default'}`} // Key más específica
+              key={avatarReloadKey} // Use key prop to force remount and re-fetch
               src={getAvatarSrc()}
               alt="Avatar de usuario"
               className={`w-24 h-24 rounded-full border-2 ${getBorderColor()} mb-3`}
               onError={(e) => {
-                console.error('Error cargando avatar:', e.target.src);
+                // Fallback to DiceBear if the main image fails to load
                 e.target.src = `${DICEBEAR_API_BASE_URL}${user?.username || 'User'}`;
               }}
             />
