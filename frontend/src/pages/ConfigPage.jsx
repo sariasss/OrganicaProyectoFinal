@@ -49,6 +49,7 @@ const ConfigPage = () => {
       const updatedUser = await updateUser(user._id, { username });
       setUser(updatedUser);
       setIsEditingUsername(false);
+      window.location.reload(); 
     } catch (err) {
       console.error('Error al guardar el nombre de usuario:', err);
     }
@@ -59,6 +60,7 @@ const ConfigPage = () => {
       const updatedUser = await updateUser(user._id, { email });
       setUser(updatedUser);
       setIsEditingEmail(false);
+      window.location.reload(); 
     } catch (err) {
       console.error('Error al guardar el email:', err);
     }
@@ -67,6 +69,7 @@ const ConfigPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setAvatarFile(file);
+    window.location.reload(); 
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
     }
@@ -104,6 +107,7 @@ const ConfigPage = () => {
       if (user?._id) {
         await changeHighlightColor(selectedHighlightColor, user._id);
         setShowThemeSelector(false);
+        window.location.reload(); 
       } else {
         console.error('ID de usuario no disponible para guardar el color de resaltado.');
       }
@@ -116,6 +120,7 @@ const ConfigPage = () => {
     try {
       if (user?._id) {
         await toggleTheme(user._id);
+        window.location.reload(); 
       } else {
         console.error('ID de usuario no disponible para alternar el tema.');
       }
