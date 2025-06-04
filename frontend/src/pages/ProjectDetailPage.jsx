@@ -301,7 +301,7 @@ const ProjectDetailPage = () => {
                                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polyline points="20 6 9 17 4 12" />
                                         </svg>
-                                        <span className="sm:inline">Guardar</span>
+                                        <span className="hidden sm:inline">Guardar</span>
                                         </>
                                     ) : (
                                         <>
@@ -309,7 +309,7 @@ const ProjectDetailPage = () => {
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                         </svg>
-                                        <span className="sm:inline">Editar</span>
+                                        <span className="hidden sm:inline">Editar</span>
                                         </>
                                     )}
                                 </button>
@@ -320,11 +320,13 @@ const ProjectDetailPage = () => {
 
                         <button
                             onClick={handleSettingsClick}
-                            className={`${secondaryBg} rounded-full p-2 sm:p-3 hover:opacity-80 transition duration-300 transform hover:scale-105`}
+                            className={`${secondaryBg} rounded-full p-2.5 sm:p-3 hover:opacity-80 transition duration-300 transform hover:scale-105 self-end sm:self-auto`}
+                            title="Configuración"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${getHighlightTextColor()} sm:w-6 sm:h-6`}>
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+                                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${getHighlightTextColor()}`}>
+                                <circle cx="12" cy="12" r="3" />
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82A1.65 1.65 0 0 0 3 13H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                             </svg>
                         </button>
                     </div>
@@ -475,13 +477,12 @@ const ProjectDetailPage = () => {
                 {/* Botones de administración del proyecto - Layout adaptativo */}
                 {isOwner && isEditing && (
                     <div className="mt-8 sm:mt-12 lg:mt-20">
-                        {/* Layout móvil/tablet */}
                         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:hidden">
                         <button
                             onClick={handleInviteClick}
                             className={`flex items-center justify-center gap-2 ${getBgColor()} rounded-full px-6 py-3 sm:px-8 sm:py-4 font-medium text-sm sm:text-base hover:opacity-80 transition duration-300 transform hover:scale-105 ${theme === 'light' ? 'text-white' : "text-black"}`}
                             >
-                            Invitar colaboradores
+                            Invitar a alguien
                         </button>
 
 
