@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { updateUser } from '../services/userService';
+import { updateUserService } from '../services/userService';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ConfigPage = () => {
@@ -46,7 +46,7 @@ const ConfigPage = () => {
 
   const handleSaveUsername = async () => {
     try {
-      const updatedUser = await updateUser(user._id, { username });
+      const updatedUser = await updateUserService(user._id, { username });
       setUser(updatedUser);
       setIsEditingUsername(false);
     } catch (err) {
@@ -56,7 +56,7 @@ const ConfigPage = () => {
 
   const handleSaveEmail = async () => {
     try {
-      const updatedUser = await updateUser(user._id, { email });
+      const updatedUser = await updateUserService(user._id, { email });
       setUser(updatedUser);
       setIsEditingEmail(false);
     } catch (err) {
@@ -82,7 +82,7 @@ const ConfigPage = () => {
       const formData = new FormData();
       formData.append('avatar', avatarFile);
 
-      const updatedUser = await updateUser(user._id, formData);
+      const updatedUser = await updateUserService(user._id, formData);
       setUser(updatedUser);
       setIsEditingAvatar(false);
       setAvatarFile(null);
