@@ -54,7 +54,7 @@ const ProjectDetailPage = () => {
 
     const canEditProject = project && user && (
         String(project?.userId) === String(user._id) ||
-        (project.permissions && project.permissions.some(p => String(p.userId) === String(user._id) && (p.rol === 'owner' || p.rol === 'editor')))
+        (project.permissions && project.permissions.some(p => String(p.userId) === String(user._id) && (p.rol === 'owner')))
     );
 
     const isOwner = project && user && (
