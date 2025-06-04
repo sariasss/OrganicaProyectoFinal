@@ -12,7 +12,7 @@ export default defineConfig({
       usePolling: true,
     },
      allowedHosts: [
-      'front-production-0596.up.railway.app/'
+      'front-production-0596.up.railway.app'
     ]
   },
 })
