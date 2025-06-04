@@ -162,7 +162,7 @@ const createData = async () => {
             {
                 pageId: bobProject1Page1._id,
                 type: "text", 
-                content: "<h3><span class=\"ql-size-large\">Ejemplo de Componente Funcional</span></h3><p><img src=\"/images/programacion.jpg\" alt=\"Código de programación\" style=\"max-width:100%;\"></p><p>```javascript\n// Ejemplo de Componente Funcional en React\nimport React from 'react';\n\nfunction WelcomeMessage(props) {\n  return <h1>¡Hola, {props.name}!</h1>;\n}\n\nexport default WelcomeMessage;\n```</p>",
+                content: "<h3><span class=\"ql-size-large\">Ejemplo de Componente Funcional</span></h3>",
                 order: 1
             },
             {
@@ -218,7 +218,7 @@ const createData = async () => {
         await Content.create({
             pageId: bobProject2Page1._id,
             type: "text",
-            content: "<h3><span class=\"ql-size-large\">Receta: Pasta Carbonara Auténtica</span></h3><p><img src=\"/images/carbonara.jpg\" alt=\"Pasta Carbonara\" style=\"max-width:100%;\"></p><ul><li>300g de guanciale (o panceta curada)</li><li>300g de pasta (espagueti o rigatoni)</li><li>2 huevos grandes + 1 yema</li><li>80g de Pecorino Romano rallado</li><li>Pimienta negra recién molida</li></ul><h3>Preparación:</h3><p>1. Cortar el guanciale en cubos y dorar en una sartén sin aceite hasta que esté crujiente. Retirar y reservar la grasa.</p><p>2. Cocer la pasta. Mientras, batir los huevos con el Pecorino y la pimienta. Añadir un poco de la grasa del guanciale a la mezcla.</p><p>3. Escurrir la pasta al dente y añadirla directamente a la sartén con el guanciale. Retirar del fuego. Incorporar la mezcla de huevo y Pecorino, revolviendo rápidamente para crear una salsa cremosa sin cocinar el huevo.</p><p>4. Servir inmediatamente con más Pecorino y pimienta.</p>",
+            content: "<h3><span class=\"ql-size-large\">Receta: Pasta Carbonara Auténtica</span></h3><p>4. Servir inmediatamente con más Pecorino y pimienta.</p>",
             order: 1
         });
 
@@ -280,7 +280,7 @@ const createData = async () => {
         await Content.create({
             pageId: carolProject1Page1._id,
             type: "text",
-            content: "<h3><span class=\"ql-size-large\">1 de Junio, 2025: Un Día Tranquilo</span></h3><p><img src=\"/images/fondo.jpg\" alt=\"Paisaje relajante\" style=\"max-width:100%;\"></p><p>Hoy fue un día increíblemente tranquilo. Empecé la mañana con una sesión de yoga suave, lo que me ayudó a centrarme. Después, pasé varias horas en el parque leyendo un libro fascinante sobre filosofía estoica. Agradecida por la paz y el tiempo para mí misma. Pequeños momentos de calma son los más valiosos.</p>",
+            content: "<h3><span class=\"ql-size-large\">1 de Junio, 2025: Un Día Tranquilo</span></h3>",
             order: 1
         });
 
