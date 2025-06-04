@@ -3,7 +3,7 @@ version: "3.8"
 services:
   mongodb: # Renombrado de 'mongotfg' para claridad y consistencia con MONGODB_URL
     image: mongo:latest
-    container_name: mongotfg # Mantén el nombre del contenedor para no cambiar dependencias en otros lados
+    container_name: mongo # Mantén el nombre del contenedor para no cambiar dependencias en otros lados
     ports:
       - "27017:27017"
     environment:
@@ -32,7 +32,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - MONGODB_URL=mongodb://root:example@mongodb:27017/organica_db?authSource=admin # **Usa el nombre del servicio 'mongodb' como host**
+      - MONGO_URL=mongodb://mongo:VkJVCQJSMqjQHjCCSKuKfIMtSBjHRxhA@mongodb.railway.internal:27017 # **Usa el nombre del servicio 'mongodb' como host**
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:5173} # Lee del .env, con fallback
       - JWT_SECRET=${JWT_SECRET:-super_secret_dev_key} # Lee del .env, con fallback
       - AVATAR_API=${AVATAR_API:-https://api.dicebear.com/5.x/initials/svg?seed=} # Lee del .env, con fallback
@@ -70,7 +70,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/organica_db?authSource=admin
+      ME_CONFIG_MONGO_URL: mongodb://mongo:VkJVCQJSMqjQHjCCSKuKfIMtSBjHRxhA@mongodb.railway.internal:27017
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: 123456
     depends_on:
@@ -86,7 +86,7 @@ services:
       dockerfile: Dockerfile
     container_name: seed_db_container
     environment:
-      - MONGODB_URL=mongodb://root:example@mongodb:27017/organica_db?authSource=admin # Pasa la MONGODB_URL
+      - MONGO_URL=mongodb://mongo:VkJVCQJSMqjQHjCCSKuKfIMtSBjHRxhA@mongodb.railway.internal:27017 # Pasa la MONGODB_URL
       - BACKEND_URL=http://localhost:3000 # Pasa la URL del backend si tu modelo User la usa
     depends_on:
       mongodb:

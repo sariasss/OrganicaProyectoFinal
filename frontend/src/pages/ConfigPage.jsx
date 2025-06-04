@@ -88,10 +88,7 @@ const ConfigPage = () => {
       setAvatarFile(null);
       setPreviewUrl(null);
 
-      // --- CAMBIO AQUÍ: Recargar la página después de guardar el avatar ---
       window.location.reload(); 
-      // Puedes usar window.location.reload(true); para forzar la recarga desde el servidor y no desde caché.
-      // Sin embargo, para imágenes que cambian con frecuencia, es posible que el navegador ya no las cachee agresivamente.
 
     } catch (err) {
       console.error('Error al guardar el avatar:', err);

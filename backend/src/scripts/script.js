@@ -13,7 +13,7 @@ import Invitation from "../models/Invitation.js";
 
 const createData = async () => {
     try {
-        const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017/organica_db';
+        const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/organica_db';
         
         await mongoose.connect(mongoUrl, {
             useNewUrlParser: true,
